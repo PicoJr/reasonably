@@ -1,8 +1,8 @@
 #![allow(non_snake_case)]
 
 use std::collections::VecDeque;
-use std::fmt;
 
+use break_infinity::Decimal;
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
@@ -26,24 +26,22 @@ fn App() -> Element {
 }
 
 #[component]
-fn DebugAction(mut bug_count: Signal<i32>) -> Element {
+fn DebugAction(mut bug_count: Signal<Decimal>) -> Element {
     rsx! {
-        button { onclick: move |_| bug_count -= 1, "Debug" }
+        button { onclick: move |_| bug_count -= Decimal::new(1.0), "Debug" }
     }
 }
 
 #[component]
 fn CodeAction(
     mut logs: Signal<SimpleLogs>,
-    mut loc_count: Signal<i32>,
-    mut bug_count: Signal<i32>,
-    loc_increment: Signal<i32>,
-    bug_loc_ratio: Signal<f32>,
+    mut loc_count: Signal<Decimal>,
+    mut bug_count: Signal<Decimal>,
 ) -> Element {
     rsx! {
         button { onclick: move |_| {
-            let delta_loc = loc_increment();
-            let delta_bug = (loc_increment() as f32 * bug_loc_ratio()) as i32;
+            let delta_loc = Decimal::new(1.0);
+            let delta_bug = Decimal::new(1.0);
             loc_count += delta_loc;
             bug_count += delta_bug;
             logs.write().log(
@@ -92,42 +90,26 @@ fn Logs(logs: Signal<SimpleLogs>) -> Element {
 
 #[component]
 fn Home() -> Element {
-    let mut logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
-    let mut loc_count: Signal<i32> = use_signal(|| 0);
-    let mut loc_increment: Signal<i32> = use_signal(|| 1);
-    let bug_count: Signal<i32> = use_signal(|| 0);
-    let bug_loc_ratio: Signal<f32> = use_signal(|| 2.0);
+    let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
+    let loc_count: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let bug_count: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     rsx! {
         Logs {logs}
         div {
-            if loc_count() > 0 {
-                h1 {"Lines of code {loc_count}"}
+            if loc_count() > Decimal::ZERO {
+                h1 {"Lines of code {loc_count().floor()}"}
             }
-            if bug_count() > 0 {
-                h1 {"Bugs {bug_count}"}
+            if bug_count() > Decimal::ZERO {
+                h1 {"Bugs {bug_count().floor()}"}
             }
             CodeAction{
                 logs,
                 loc_count,
                 bug_count,
-                loc_increment,
-                bug_loc_ratio,
             }
-            if bug_count() > 0 {
+            if bug_count() > Decimal::ZERO {
                 DebugAction {bug_count}
-            }
-            if loc_count() >= 20 && bug_count() <= 0 {
-                button {onclick: move |_| {
-                    loc_count -= 20;
-                }, "Write a hello world"}
-            }
-
-            if loc_count() >= 10 && bug_count() <= 0 {
-                button {onclick: move |_| {
-                    loc_count -= 10;
-                    loc_increment += 1;
-                }, "Learn VIM"}
             }
         }
     }

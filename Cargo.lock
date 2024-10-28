@@ -105,6 +105,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "break_infinity"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d6898790a722ed3559e8c8cfb77aaa542b5a95a6fbc822491b6d9c48dc570aa5"
+dependencies = [
+ "lazy_static",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1389,6 +1398,7 @@ dependencies = [
 name = "rocket-science-dioxus"
 version = "0.1.0"
 dependencies = [
+ "break_infinity",
  "dioxus",
  "dioxus-logger",
 ]
