@@ -6,6 +6,8 @@ use break_infinity::Decimal;
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
+use async_std::task::sleep;
+
 #[derive(Clone, Routable, Debug, PartialEq)]
 enum Route {
     #[route("/")]
@@ -91,8 +93,15 @@ fn Logs(logs: Signal<SimpleLogs>) -> Element {
 #[component]
 fn Home() -> Element {
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
-    let loc_count: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut loc_count: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let bug_count: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+
+    use_future(move || async move {
+        loop {
+            sleep(std::time::Duration::from_millis(1000)).await;
+            loc_count += Decimal::new(1.0);
+        }
+    });
 
     rsx! {
         Logs {logs}
