@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 
 use break_infinity::Decimal;
 use dioxus::prelude::*;
@@ -66,6 +66,62 @@ fn HireInternAction(mut logs: Signal<SimpleLogs>, mut interns_clicks: Signal<Dec
     }
 }
 
+#[component]
+fn ResearchHireIntern(
+    mut logs: Signal<SimpleLogs>,
+    mut researched: Signal<HashSet<String>>,
+    loc: Signal<Decimal>,
+) -> Element {
+    let loc_cost = Decimal::new(1e1);
+    let disabled = loc() < loc_cost;
+    rsx! {
+        div {
+            class: "research",
+            p {"You can hire interns who code automaticaly"}
+            p {"Cost {loc_cost} loc"}
+            button {
+                class: "research-button",
+                disabled: disabled,
+                onclick: move |_| {
+                researched.write().insert("internship".to_string()) ;
+                logs.write().log(
+                    "internship researched..."
+                );
+                loc -= loc_cost;
+            }
+            , "research internship" }
+        }
+    }
+}
+
+#[component]
+fn ResearchCodeMetrics(
+    mut logs: Signal<SimpleLogs>,
+    mut researched: Signal<HashSet<String>>,
+    loc: Signal<Decimal>,
+) -> Element {
+    let loc_cost = Decimal::new(1e1);
+    let disabled = loc() < loc_cost;
+    rsx! {
+        div {
+            class: "research",
+            p {"You can monitor the loc/s and bugs/s"}
+            p {"Cost {loc_cost} loc"}
+            button {
+                class: "research-button",
+                disabled: disabled,
+                onclick: move |_| {
+                researched.write().insert("code_metrics".to_string()) ;
+                logs.write().log(
+                    "code metrics researched..."
+                );
+                loc -= loc_cost;
+            }
+            , "research code metrics" }
+        }
+    }
+}
+
 struct SimpleLogs {
     max_lines: usize,
     lines: VecDeque<String>,
@@ -105,6 +161,11 @@ fn Logs(logs: Signal<SimpleLogs>) -> Element {
 #[component]
 fn Home() -> Element {
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
+    let researched: Signal<HashSet<String>> = use_signal(HashSet::new);
+
+    // stats
+    let mut loc_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut bugs_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // clicks
     let mut code_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
@@ -127,6 +188,7 @@ fn Home() -> Element {
     let interns_loc_dt: Signal<Decimal> = use_signal(|| Decimal::new(1.0));
 
     use_future(move || async move {
+        let dt_milliseconds = 100;
         loop {
             let dt = Decimal::new(0.01);
             let manual_loc = code_clicks() * loc_per_clicks();
@@ -135,10 +197,14 @@ fn Home() -> Element {
                 manual_loc * manual_bugs_ratio() - debug_clicks() * debug_per_clicks();
 
             let auto_loc = interns() * interns_loc_dt() * dt;
-            let auto_bugs = interns() * interns_bugs_ratio() * dt;
+            let auto_bugs = interns() * interns_loc_dt() * interns_bugs_ratio() * dt;
 
             loc += manual_loc + auto_loc;
+            *loc_dt.write() =
+                (manual_loc + auto_loc) * Decimal::new(1e3 / (dt_milliseconds as f64));
             bugs += manual_bugs + auto_bugs;
+            *bugs_dt.write() =
+                (manual_bugs + auto_bugs) * Decimal::new(1e3 / (dt_milliseconds as f64));
             interns += manual_interns;
 
             // reset clicks
@@ -146,7 +212,7 @@ fn Home() -> Element {
             *debug_clicks.write() = Decimal::ZERO;
             *interns_clicks.write() = Decimal::ZERO;
             // sleep before next tick
-            sleep(std::time::Duration::from_millis(100)).await;
+            sleep(std::time::Duration::from_millis(dt_milliseconds)).await;
         }
     });
 
@@ -154,26 +220,48 @@ fn Home() -> Element {
         Logs {logs}
         div {
             if loc() > Decimal::ZERO {
-                h1 {"Lines of code {loc().floor()}"}
+                p {"Lines of code {loc().floor()}"}
+            }
+            if researched().contains("code_metrics") {
+                p {"LOC/s {loc_dt().floor()}"}
             }
             if bugs() > Decimal::ZERO {
-                h1 {"Bugs {bugs().floor()}"}
+                p {"Bugs {bugs().floor()}"}
+            }
+            if researched().contains("code_metrics") {
+                p {"bugs/s {bugs_dt().floor()}"}
             }
             if interns() > Decimal::ZERO {
-                h1 {"Interns {interns().floor()}"}
+                p {"Interns {interns().floor()}"}
             }
             CodeAction{
                 logs,
                 code_clicks,
             }
-            HireInternAction {
-                logs,
-                interns_clicks,
-            }
             if bugs() > Decimal::ZERO {
                 DebugAction {
                     logs,
                     debug_clicks,
+                }
+            }
+            if !researched().contains("internship") {
+                ResearchHireIntern {
+                    logs,
+                    researched,
+                    loc,
+                }
+            }
+            if !researched().contains("code_metrics") {
+                ResearchCodeMetrics {
+                    logs,
+                    researched,
+                    loc,
+                }
+            }
+            if researched().contains("internship") {
+                HireInternAction {
+                    logs,
+                    interns_clicks,
                 }
             }
         }
