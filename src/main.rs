@@ -2,7 +2,7 @@
 
 use std::collections::{HashSet, VecDeque};
 
-use break_infinity::Decimal;
+use break_infinity::{sum_geometric_series, Decimal};
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
@@ -45,7 +45,7 @@ fn RepeatableAction(
     rsx! {
         div {
             class: "repeatable-action",
-            p {"You can hire interns who code automaticaly"}
+            p {"{description}"}
             p {"Cost {loc_cost} loc"}
             button {
                 disabled: disabled,
@@ -231,10 +231,19 @@ fn Home() -> Element {
             let manual_bugs =
                 manual_loc * manual_bugs_ratio() - debug_clicks() * debug_per_clicks();
 
+            // purchases
+            // must be computed before incrementing interns
+            let manual_interns_loc_cost = sum_geometric_series(
+                &manual_interns,
+                &interns_loc_base_cost,
+                &interns_loc_growth_rate,
+                &interns(),
+            );
+
             let auto_loc = interns() * interns_loc_dt() * dt;
             let auto_bugs = interns() * interns_loc_dt() * interns_bugs_ratio() * dt;
 
-            loc += manual_loc + auto_loc;
+            loc += manual_loc - manual_interns_loc_cost + auto_loc;
             *loc_dt.write() =
                 (manual_loc + auto_loc) * Decimal::new(1e3 / (dt_milliseconds as f64));
             bugs += manual_bugs + auto_bugs;
@@ -299,16 +308,18 @@ fn Home() -> Element {
                     interns_clicks,
                 }
             }
-            RepeatableAction{
-                logs: logs,
-                clicks: interns_clicks,
-                loc: loc,
-                produced: interns,
-                button_name: "hire intern",
-                debug_message: "debug message",
-                description: "description",
-                loc_base_cost: interns_loc_base_cost,
-                loc_growth_rate: interns_loc_growth_rate,
+            if researched().contains("internship") {
+                RepeatableAction{
+                    logs: logs,
+                    clicks: interns_clicks,
+                    loc: loc,
+                    produced: interns,
+                    button_name: "hire intern",
+                    debug_message: "hiring an intern...",
+                    description: "Produces loc, and bugs",
+                    loc_base_cost: interns_loc_base_cost,
+                    loc_growth_rate: interns_loc_growth_rate,
+                }
             }
         }
     }
