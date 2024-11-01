@@ -28,6 +28,38 @@ fn App() -> Element {
 }
 
 #[component]
+fn RepeatableAction(
+    mut logs: Signal<SimpleLogs>,
+    mut clicks: Signal<Decimal>,
+    loc: Signal<Decimal>,
+    produced: Signal<Decimal>,
+    button_name: String,
+    debug_message: String,
+    description: String,
+    loc_base_cost: Decimal,
+    loc_growth_rate: Decimal,
+) -> Element {
+    let new_instances = produced() + clicks();
+    let loc_cost = loc_base_cost * loc_growth_rate.pow(&new_instances);
+    let disabled = loc() < loc_cost;
+    rsx! {
+        div {
+            class: "repeatable-action",
+            p {"You can hire interns who code automaticaly"}
+            p {"Cost {loc_cost} loc"}
+            button {
+                disabled: disabled,
+                class: "repeatable-action-button",
+                onclick: move |_| {
+                clicks += Decimal::new(1.0);
+                logs.write().log(debug_message.as_str())
+            }
+            , {button_name} }
+        }
+    }
+}
+
+#[component]
 fn DebugAction(mut logs: Signal<SimpleLogs>, mut debug_clicks: Signal<Decimal>) -> Element {
     rsx! {
         button { onclick: move |_| {
@@ -160,6 +192,9 @@ fn Logs(logs: Signal<SimpleLogs>) -> Element {
 
 #[component]
 fn Home() -> Element {
+    let interns_loc_base_cost = Decimal::new(10.0);
+    let interns_loc_growth_rate = Decimal::new(1.1);
+
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
     let researched: Signal<HashSet<String>> = use_signal(HashSet::new);
 
@@ -263,6 +298,17 @@ fn Home() -> Element {
                     logs,
                     interns_clicks,
                 }
+            }
+            RepeatableAction{
+                logs: logs,
+                clicks: interns_clicks,
+                loc: loc,
+                produced: interns,
+                button_name: "hire intern",
+                debug_message: "debug message",
+                description: "description",
+                loc_base_cost: interns_loc_base_cost,
+                loc_growth_rate: interns_loc_growth_rate,
             }
         }
     }

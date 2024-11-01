@@ -64,3 +64,14 @@ body {
     width:300px;
     margin:auto;
 }
+
+.repeatable-action {
+    width:300px;
+    margin:auto;
+    background-color: var(--research-bg-color);
+}
+
+.repeatable-action-button {
+    width:300px;
+    margin:auto;
+}
