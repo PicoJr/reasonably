@@ -86,70 +86,33 @@ fn CodeAction(mut logs: Signal<SimpleLogs>, mut code_clicks: Signal<Decimal>) ->
 }
 
 #[component]
-fn HireInternAction(mut logs: Signal<SimpleLogs>, mut interns_clicks: Signal<Decimal>) -> Element {
-    rsx! {
-        button { onclick: move |_| {
-            interns_clicks += Decimal::new(1.0);
-            logs.write().log(
-                "hiring an intern..."
-            )
-        }
-        , "Hire interns" }
-    }
-}
-
-#[component]
-fn ResearchHireIntern(
+fn ResearchOnce(
     mut logs: Signal<SimpleLogs>,
     mut researched: Signal<HashSet<String>>,
-    loc: Signal<Decimal>,
+    mut loc: Signal<Decimal>,
+    research_name: String,
+    button_name: String,
+    debug_message: String,
+    description: String,
+    loc_cost: Decimal,
 ) -> Element {
-    let loc_cost = Decimal::new(1e1);
     let disabled = loc() < loc_cost;
     rsx! {
         div {
             class: "research",
-            p {"You can hire interns who code automaticaly"}
+            p {"{description}"}
             p {"Cost {loc_cost} loc"}
             button {
                 class: "research-button",
                 disabled: disabled,
                 onclick: move |_| {
-                researched.write().insert("internship".to_string()) ;
+                researched.write().insert(research_name.clone()) ;
                 logs.write().log(
-                    "internship researched..."
+                    &debug_message
                 );
                 loc -= loc_cost;
             }
-            , "research internship" }
-        }
-    }
-}
-
-#[component]
-fn ResearchCodeMetrics(
-    mut logs: Signal<SimpleLogs>,
-    mut researched: Signal<HashSet<String>>,
-    loc: Signal<Decimal>,
-) -> Element {
-    let loc_cost = Decimal::new(1e1);
-    let disabled = loc() < loc_cost;
-    rsx! {
-        div {
-            class: "research",
-            p {"You can monitor the loc/s and bugs/s"}
-            p {"Cost {loc_cost} loc"}
-            button {
-                class: "research-button",
-                disabled: disabled,
-                onclick: move |_| {
-                researched.write().insert("code_metrics".to_string()) ;
-                logs.write().log(
-                    "code metrics researched..."
-                );
-                loc -= loc_cost;
-            }
-            , "research code metrics" }
+            , {button_name} }
         }
     }
 }
@@ -194,6 +157,8 @@ fn Logs(logs: Signal<SimpleLogs>) -> Element {
 fn Home() -> Element {
     let interns_loc_base_cost = Decimal::new(10.0);
     let interns_loc_growth_rate = Decimal::new(1.1);
+    let research_internship_loc_cost = Decimal::new(10.0);
+    let research_code_metrics_loc_cost = Decimal::new(10.0);
 
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
     let researched: Signal<HashSet<String>> = use_signal(HashSet::new);
@@ -226,8 +191,12 @@ fn Home() -> Element {
         let dt_milliseconds = 100;
         loop {
             let dt = Decimal::new(0.01);
+            // loc produced by clicking on the code button
             let manual_loc = code_clicks() * loc_per_clicks();
+            // interns hired by clicking the hire interns button
             let manual_interns = interns_clicks();
+            // bugs produced as a byproduct of clicking the code button
+            // subtracting bugs removed by clicking the debug button
             let manual_bugs =
                 manual_loc * manual_bugs_ratio() - debug_clicks() * debug_per_clicks();
 
@@ -240,18 +209,27 @@ fn Home() -> Element {
                 &interns(),
             );
 
+            // loc produced by interns, ...
             let auto_loc = interns() * interns_loc_dt() * dt;
+            // bugs produced by interns, ...
             let auto_bugs = interns() * interns_loc_dt() * interns_bugs_ratio() * dt;
 
+            // update loc, accounting all sources
             loc += manual_loc - manual_interns_loc_cost + auto_loc;
+            // update live code metrics
             *loc_dt.write() =
                 (manual_loc + auto_loc) * Decimal::new(1e3 / (dt_milliseconds as f64));
+
+            // update bugs, accouting for all sources
             bugs += manual_bugs + auto_bugs;
+            // update live code metrics
             *bugs_dt.write() =
                 (manual_bugs + auto_bugs) * Decimal::new(1e3 / (dt_milliseconds as f64));
+
+            // update interns count, accouting for all sources
             interns += manual_interns;
 
-            // reset clicks
+            // reset clicks, now that all clicks have been taken into account
             *code_clicks.write() = Decimal::ZERO;
             *debug_clicks.write() = Decimal::ZERO;
             *interns_clicks.write() = Decimal::ZERO;
@@ -289,23 +267,27 @@ fn Home() -> Element {
                 }
             }
             if !researched().contains("internship") {
-                ResearchHireIntern {
-                    logs,
-                    researched,
-                    loc,
+                ResearchOnce{
+                    logs: logs,
+                    researched: researched,
+                    loc: loc,
+                    research_name: "internship",
+                    button_name: "research internship",
+                    debug_message: "intership researched",
+                    description: "Allow hiring interns, who produce loc and bugs automaticaly.",
+                    loc_cost: research_internship_loc_cost,
                 }
             }
             if !researched().contains("code_metrics") {
-                ResearchCodeMetrics {
-                    logs,
-                    researched,
-                    loc,
-                }
-            }
-            if researched().contains("internship") {
-                HireInternAction {
-                    logs,
-                    interns_clicks,
+                ResearchOnce{
+                    logs: logs,
+                    researched: researched,
+                    loc: loc,
+                    research_name: "code_metrics",
+                    button_name: "research code metrics",
+                    debug_message: "code metrics researched",
+                    description: "Display LOC/s and bugs/s.",
+                    loc_cost: research_code_metrics_loc_cost,
                 }
             }
             if researched().contains("internship") {
