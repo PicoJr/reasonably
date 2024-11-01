@@ -8,6 +8,12 @@ use dioxus_logger::tracing::{info, Level};
 
 use async_std::task::sleep;
 
+#[derive(Clone, Debug, PartialEq)]
+enum Theme {
+    LightTheme,
+    DarkTheme,
+}
+
 #[derive(Clone, Routable, Debug, PartialEq)]
 enum Route {
     #[route("/")]
@@ -82,6 +88,45 @@ fn CodeAction(mut logs: Signal<SimpleLogs>, mut code_clicks: Signal<Decimal>) ->
             )
         }
         , "Code" }
+    }
+}
+
+#[component]
+fn ToggleThemeAction(
+    mut logs: Signal<SimpleLogs>,
+    mut theme: Signal<Theme>,
+) -> Element {
+    let current_theme: Theme = theme();
+    rsx! {
+        button { onclick: move |_| {
+            match current_theme {
+                Theme::LightTheme => {
+                    *theme.write() = Theme::DarkTheme;
+                    logs.write().log(
+                        "toggling theme...now dark"
+                    );
+                    spawn(async move {
+                        eval(r#"
+                        document.documentElement.setAttribute('data-theme', "dark")
+                        "#,
+                        ).await.expect("failed to run JS");
+                    });
+                },
+                Theme::DarkTheme => {
+                    *theme.write() = Theme::LightTheme;
+                    logs.write().log(
+                        "toggling theme...now light"
+                    );
+                    spawn(async move {
+                        eval(r#"
+                        document.documentElement.setAttribute('data-theme', "light")
+                        "#,
+                        ).await.expect("failed to run JS");
+                    });
+                },
+            };
+        }
+        , "Toggle Theme" }
     }
 }
 
@@ -162,6 +207,7 @@ fn Home() -> Element {
 
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
     let researched: Signal<HashSet<String>> = use_signal(HashSet::new);
+    let theme: Signal<Theme> = use_signal(|| Theme::LightTheme);
 
     // stats
     let mut loc_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
@@ -265,6 +311,10 @@ fn Home() -> Element {
                     logs,
                     debug_clicks,
                 }
+            }
+            ToggleThemeAction {
+                logs: logs,
+                theme: theme,
             }
             if !researched().contains("internship") {
                 ResearchOnce{
