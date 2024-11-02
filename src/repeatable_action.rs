@@ -5,6 +5,7 @@ use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
 
 use crate::simple_logs::SimpleLogs;
+use crate::format_decimal::format_decimal;
 
 #[component]
 pub(crate) fn RepeatableAction(
@@ -25,7 +26,7 @@ pub(crate) fn RepeatableAction(
         div {
             class: "repeatable-action",
             p {"{description}"}
-            p {"Cost {loc_cost} loc"}
+            p {"Cost {format_decimal(loc_cost)} loc"}
             button {
                 disabled: disabled,
                 class: "repeatable-action-button",
