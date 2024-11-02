@@ -12,7 +12,7 @@ use simple_logs::{SimpleLogs, Logs};
 use repeatable_action::RepeatableAction;
 use toggle_theme_action::ToggleThemeAction;
 use research_once::ResearchOnce;
-use format_decimal::format_decimal;
+use format_decimal::{format_decimal_devs, format_decimal_bugs, format_decimal_loc};
 
 use std::collections::{HashSet};
 
@@ -115,10 +115,12 @@ fn Home() -> Element {
     // senior_devs -> retired_devs
     let senior_devs_retirement_ratio_dt: Signal<Decimal> = use_signal(|| Decimal::new(0.01));
 
+    // simulation time between 2 updates
+    let mut dt: Signal<Decimal> = use_signal(|| Decimal::new(0.01));
+
     use_future(move || async move {
         let dt_milliseconds = 100; // real time between 2 updates
         loop {
-            let dt = Decimal::new(0.01); // simulation time between 2 updates
             // loc produced by clicking on the code button
             let manual_loc = code_clicks() * loc_per_clicks();
             // interns hired by clicking the hire interns button
@@ -160,13 +162,13 @@ fn Home() -> Element {
                 interns() * interns_loc_dt()
                 + junior_devs() * junior_devs_loc_dt()
                 + senior_devs() * senior_devs_loc_dt()
-            ) * dt;
+            ) * dt();
             // bugs produced by interns, ...
             let auto_bugs = (
                 interns() * interns_loc_dt() * interns_bugs_ratio()
                 + junior_devs() * junior_devs_loc_dt() * junior_devs_bugs_ratio()
                 + senior_devs() * senior_devs_loc_dt() * senior_devs_bugs_ratio()
-            ) * dt;
+            ) * dt();
 
             // update loc, accounting all sources
             loc += manual_loc + auto_loc - (
@@ -188,17 +190,17 @@ fn Home() -> Element {
             senior_devs += manual_senior_devs;
 
             // handle promotions
-            *retired_devs.write() += senior_devs() * senior_devs_retirement_ratio_dt() * dt;
-            *senior_devs.write() = senior_devs() * (Decimal::ONE - senior_devs_retirement_ratio_dt() * dt);
+            *retired_devs.write() += senior_devs() * senior_devs_retirement_ratio_dt() * dt();
+            *senior_devs.write() = senior_devs() * (Decimal::ONE - senior_devs_retirement_ratio_dt() * dt());
 
             if researched().contains("junior_devs_promotion") {
-                *senior_devs.write() += junior_devs() * junior_devs_promotion_ratio_dt() * dt;
-                *junior_devs.write() = junior_devs() * (Decimal::ONE - junior_devs_promotion_ratio_dt() * dt);
+                *senior_devs.write() += junior_devs() * junior_devs_promotion_ratio_dt() * dt();
+                *junior_devs.write() = junior_devs() * (Decimal::ONE - junior_devs_promotion_ratio_dt() * dt());
             }
 
             if researched().contains("interns_promotion") {
-                *junior_devs.write() += interns() * interns_promotion_ratio_dt() * dt;
-                *interns.write() = interns() * (Decimal::ONE - interns_promotion_ratio_dt() * dt);
+                *junior_devs.write() += interns() * interns_promotion_ratio_dt() * dt();
+                *interns.write() = interns() * (Decimal::ONE - interns_promotion_ratio_dt() * dt());
             }
 
             // handle rm -rf
@@ -227,26 +229,27 @@ fn Home() -> Element {
             div { // vertical
                 class: "metrics",
                 if researched().contains("code_metrics") {
-                    p {"LOC/s {format_decimal(loc_dt())}"}
-                    p {"bugs/s {format_decimal(bugs_dt())}"}
+                    p {"LOC/s {format_decimal_loc(loc_dt())}"}
+                    p {"bugs/s {format_decimal_bugs(bugs_dt())}"}
+                    p {"dt {dt()}"}
                 }
                 if interns() > Decimal::ZERO {
-                    p {"Interns {format_decimal(interns())}"}
+                    p {"Interns {format_decimal_devs(interns())}"}
                 }
                 if junior_devs() > Decimal::ZERO {
-                    p {"Junior devs {format_decimal(junior_devs())}"}
+                    p {"Junior devs {format_decimal_devs(junior_devs())}"}
                 }
                 if senior_devs() > Decimal::ZERO {
-                    p {"Senior devs {format_decimal(senior_devs())}"}
+                    p {"Senior devs {format_decimal_devs(senior_devs())}"}
                 }
                 if retired_devs() > Decimal::ZERO {
-                    p {"Retired devs {format_decimal(retired_devs())}"}
+                    p {"Retired devs {format_decimal_devs(retired_devs())}"}
                 }
                 if loc() > Decimal::ZERO {
-                    p {"Lines of code {format_decimal(loc())}"}
+                    p {"Lines of code {format_decimal_loc(loc())}"}
                 }
                 if bugs() > Decimal::ZERO {
-                    p {"Bugs {format_decimal(bugs())}"}
+                    p {"Bugs {format_decimal_bugs(bugs())}"}
                 }
             }
             div { // horizontal
@@ -257,6 +260,41 @@ fn Home() -> Element {
                         logs,
                         code_clicks,
                     }
+                    button {
+                        onclick: move |_| {
+                            loc *= Decimal::new(2.0);
+                    }
+                    , {"cheat loc"} }
+                    button {
+                        onclick: move |_| {
+                            bugs *= Decimal::new(2.0);
+                    }
+                    , {"cheat bugs"} }
+                    button {
+                        onclick: move |_| {
+                            interns *= Decimal::new(2.0);
+                    }
+                    , {"cheat interns"} }
+                    button {
+                        onclick: move |_| {
+                            junior_devs *= Decimal::new(2.0);
+                    }
+                    , {"cheat junior devs"} }
+                    button {
+                        onclick: move |_| {
+                            senior_devs *= Decimal::new(2.0);
+                    }
+                    , {"cheat senior devs"} }
+                    button {
+                        onclick: move |_| {
+                            dt *= Decimal::new(2.0);
+                    }
+                    , {"cheat time faster"} }
+                    button {
+                        onclick: move |_| {
+                            dt /= Decimal::new(2.0);
+                    }
+                    , {"cheat time slower"} }
                     if bugs() > Decimal::ZERO {
                         DebugAction {
                             logs,
