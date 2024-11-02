@@ -2,6 +2,7 @@
     --bg-color: #ffffff;
     --text-color: #121416d8;
     --research-bg-color: #cfcfcf;
+    --fade-duration: 1s;
 }
 
 [data-theme='light'] {
@@ -56,6 +57,11 @@ body {
     flex-direction: column;
 }
 
+@keyframes fadeIn {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+}
+
 #links {
     width: 400px;
     text-align: left;
@@ -93,6 +99,7 @@ body {
     margin:auto;
     background-color: var(--research-bg-color);
     color: var(--text-color);
+    animation: fadeIn var(--fade-duration);
 }
 
 .research-button {
@@ -107,6 +114,7 @@ body {
     margin:auto;
     background-color: var(--research-bg-color);
     color: var(--text-color);
+    animation: fadeIn var(--fade-duration);
 }
 
 .repeatable-action-button {
