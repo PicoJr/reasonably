@@ -2,6 +2,8 @@
     --bg-color: #ffffff;
     --text-color: #121416d8;
     --research-bg-color: #cfcfcf;
+    --button-bg-color: #9bbaff;
+    --button-disabled-bg-color: #7a7a7a;
     --fade-duration: 1s;
 }
 
@@ -9,12 +11,14 @@
     --bg-color: #fff;
     --text-color: #121416d8;
     --research-bg-color: #cfcfcf;
+    --button-bg-color: #9bbaff;
 }
 
 [data-theme='dark'] {
     --bg-color: #212a2e;
     --text-color: #F7F8F8;
     --research-bg-color: #555555;
+    --button-bg-color: #25459f;
 }
 
 body {
@@ -103,7 +107,14 @@ body {
 .research-button {
     width:300px;
     margin:auto;
-    background-color: var(--research-bg-color);
+    background-color: var(--button-bg-color);
+    color: var(--text-color);
+}
+
+.research-button:disabled {
+    width:300px;
+    margin:auto;
+    background-color: var(--button-disabled-bg-color);
     color: var(--text-color);
 }
 
@@ -118,6 +129,12 @@ body {
 .repeatable-action-button {
     width:300px;
     margin:auto;
-    background-color: var(--research-bg-color);
+    background-color: var(--button-bg-color);
+    color: var(--text-color);
+}
+.repeatable-action-button:disabled {
+    width:300px;
+    margin:auto;
+    background-color: var(--button-disabled-bg-color);
     color: var(--text-color);
 }
