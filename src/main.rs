@@ -285,72 +285,83 @@ fn Home() -> Element {
     });
 
     rsx! {
-        Logs {logs}
-        div {
-            if loc() > Decimal::ZERO {
-                p {"Lines of code {loc().floor()}"}
-            }
-            if researched().contains("code_metrics") {
-                p {"LOC/s {loc_dt().floor()}"}
-            }
-            if bugs() > Decimal::ZERO {
-                p {"Bugs {bugs().floor()}"}
-            }
-            if researched().contains("code_metrics") {
-                p {"bugs/s {bugs_dt().floor()}"}
-            }
-            if interns() > Decimal::ZERO {
-                p {"Interns {interns().floor()}"}
-            }
-            CodeAction{
-                logs,
-                code_clicks,
-            }
-            if bugs() > Decimal::ZERO {
-                DebugAction {
-                    logs,
-                    debug_clicks,
+        div { // vertical
+            class: "everything",
+            Logs {logs}
+            div { // vertical
+                class: "metrics",
+                if researched().contains("code_metrics") {
+                    p {"LOC/s {loc_dt().floor()}"}
+                    p {"bugs/s {bugs_dt().floor()}"}
+                }
+                if interns() > Decimal::ZERO {
+                    p {"Interns {interns().floor()}"}
+                }
+                if loc() > Decimal::ZERO {
+                    p {"Lines of code {loc().floor()}"}
+                }
+                if bugs() > Decimal::ZERO {
+                    p {"Bugs {bugs().floor()}"}
                 }
             }
-            ToggleThemeAction {
-                logs: logs,
-                theme: theme,
-            }
-            if !researched().contains("internship") {
-                ResearchOnce{
-                    logs: logs,
-                    researched: researched,
-                    loc: loc,
-                    research_name: "internship",
-                    button_name: "research internship",
-                    debug_message: "intership researched",
-                    description: "Allow hiring interns, who produce loc and bugs automaticaly.",
-                    loc_cost: research_internship_loc_cost,
+            div { // horizontal
+                class: "interactions",
+                div { // vertical
+                    class: "repeatable-actions",
+                    CodeAction{
+                        logs,
+                        code_clicks,
+                    }
+                    if bugs() > Decimal::ZERO {
+                        DebugAction {
+                            logs,
+                            debug_clicks,
+                        }
+                    }
+                    ToggleThemeAction {
+                        logs: logs,
+                        theme: theme,
+                    }
+                    if researched().contains("internship") {
+                        RepeatableAction{
+                            logs: logs,
+                            clicks: interns_clicks,
+                            loc: loc,
+                            produced: interns,
+                            button_name: "hire intern",
+                            debug_message: "hiring an intern...",
+                            description: "Produces loc, and bugs",
+                            loc_base_cost: interns_loc_base_cost,
+                            loc_growth_rate: interns_loc_growth_rate,
+                        }
+                    }
                 }
-            }
-            if !researched().contains("code_metrics") {
-                ResearchOnce{
-                    logs: logs,
-                    researched: researched,
-                    loc: loc,
-                    research_name: "code_metrics",
-                    button_name: "research code metrics",
-                    debug_message: "code metrics researched",
-                    description: "Display LOC/s and bugs/s.",
-                    loc_cost: research_code_metrics_loc_cost,
-                }
-            }
-            if researched().contains("internship") {
-                RepeatableAction{
-                    logs: logs,
-                    clicks: interns_clicks,
-                    loc: loc,
-                    produced: interns,
-                    button_name: "hire intern",
-                    debug_message: "hiring an intern...",
-                    description: "Produces loc, and bugs",
-                    loc_base_cost: interns_loc_base_cost,
-                    loc_growth_rate: interns_loc_growth_rate,
+                div { // vertical
+                    class: "researches",
+                    if !researched().contains("internship") {
+                        ResearchOnce{
+                            logs: logs,
+                            researched: researched,
+                            loc: loc,
+                            research_name: "internship",
+                            button_name: "research internship",
+                            debug_message: "intership researched",
+                            description: "Allow hiring interns, who produce loc and bugs automaticaly.",
+                            loc_cost: research_internship_loc_cost,
+                        }
+                    }
+                    if !researched().contains("code_metrics") {
+                        ResearchOnce{
+                            logs: logs,
+                            researched: researched,
+                            loc: loc,
+                            research_name: "code_metrics",
+                            button_name: "research code metrics",
+                            debug_message: "code metrics researched",
+                            description: "Display LOC/s and bugs/s.",
+                            loc_cost: research_code_metrics_loc_cost,
+                        }
+                    }
                 }
             }
         }

@@ -26,9 +26,34 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: left;
+    /* justify-content: center; */
+    /* align-items: left; */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+}
+
+.everything {
+    display: flex;
+    flex-direction: column;
+}
+
+.interactions {
+    display: flex;
+    flex-direction: row;
+}
+
+.metrics {
+    display: flex;
+    flex-direction: column;
+}
+
+.repeatable-actions {
+    display: flex;
+    flex-direction: column;
+}
+
+.researches {
+    display: flex;
+    flex-direction: column;
 }
 
 #links {
