@@ -204,6 +204,7 @@ fn Home() -> Element {
     let interns_loc_growth_rate = Decimal::new(1.1);
     let research_internship_loc_cost = Decimal::new(10.0);
     let research_code_metrics_loc_cost = Decimal::new(10.0);
+    let research_rmrf_loc_cost = Decimal::new(10.0);
 
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
     let researched: Signal<HashSet<String>> = use_signal(HashSet::new);
@@ -217,6 +218,7 @@ fn Home() -> Element {
     let mut code_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut debug_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut interns_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut rmrf_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // production per clicks
     let loc_per_clicks: Signal<Decimal> = use_signal(|| Decimal::new(1.0));
@@ -232,6 +234,9 @@ fn Home() -> Element {
     // producers
     let mut interns: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let interns_loc_dt: Signal<Decimal> = use_signal(|| Decimal::new(1.0));
+
+    // placeholder
+    let placeholder: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     use_future(move || async move {
         let dt_milliseconds = 100;
@@ -275,10 +280,18 @@ fn Home() -> Element {
             // update interns count, accouting for all sources
             interns += manual_interns;
 
+            // handle rm -rf
+            if rmrf_clicks() > Decimal::ZERO {
+                *loc.write() = Decimal::ZERO;
+                *bugs.write() = Decimal::ZERO;
+            }
+
             // reset clicks, now that all clicks have been taken into account
             *code_clicks.write() = Decimal::ZERO;
             *debug_clicks.write() = Decimal::ZERO;
             *interns_clicks.write() = Decimal::ZERO;
+            *rmrf_clicks.write() = Decimal::ZERO;
+
             // sleep before next tick
             sleep(std::time::Duration::from_millis(dt_milliseconds)).await;
         }
@@ -335,6 +348,19 @@ fn Home() -> Element {
                             loc_growth_rate: interns_loc_growth_rate,
                         }
                     }
+                    if researched().contains("rmrf") {
+                        RepeatableAction{
+                            logs: logs,
+                            clicks: rmrf_clicks,
+                            loc: loc,
+                            produced: placeholder,
+                            button_name: "rm -rf",
+                            debug_message: "running rm -rf...",
+                            description: "Wipe out all loc and bugs",
+                            loc_base_cost: Decimal::ZERO,
+                            loc_growth_rate: Decimal::ONE,
+                        }
+                    }
                 }
                 div { // vertical
                     class: "researches",
@@ -360,6 +386,18 @@ fn Home() -> Element {
                             debug_message: "code metrics researched",
                             description: "Display LOC/s and bugs/s.",
                             loc_cost: research_code_metrics_loc_cost,
+                        }
+                    }
+                    if !researched().contains("rmrf") {
+                        ResearchOnce{
+                            logs: logs,
+                            researched: researched,
+                            loc: loc,
+                            research_name: "rmrf",
+                            button_name: "learn rm -rf",
+                            debug_message: "rm -rf researched",
+                            description: "For desperate situations, allow using rm-rf command",
+                            loc_cost: research_rmrf_loc_cost,
                         }
                     }
                 }
