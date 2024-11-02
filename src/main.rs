@@ -1,5 +1,9 @@
 #![allow(non_snake_case)]
 
+mod simple_logs;
+
+use simple_logs::SimpleLogs;
+
 use std::collections::{HashSet, VecDeque};
 
 use break_infinity::{sum_geometric_series, Decimal};
@@ -162,31 +166,6 @@ fn ResearchOnce(
     }
 }
 
-struct SimpleLogs {
-    max_lines: usize,
-    lines: VecDeque<String>,
-}
-
-impl SimpleLogs {
-    fn new() -> Self {
-        SimpleLogs {
-            max_lines: 5,
-            lines: VecDeque::new(),
-        }
-    }
-
-    fn render(&self) -> String {
-        let lines: Vec<String> = self.lines.iter().cloned().collect();
-        lines.join("\n")
-    }
-
-    fn log(&mut self, message: &str) {
-        if self.lines.len() >= self.max_lines {
-            self.lines.pop_front();
-        }
-        self.lines.push_back(message.to_string());
-    }
-}
 
 #[component]
 fn Logs(logs: Signal<SimpleLogs>) -> Element {
