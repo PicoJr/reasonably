@@ -1,5 +1,5 @@
 [package]
-name = "rocket-science-dioxus"
+name = "reasonably"
 version = "0.1.0"
 authors = ["PicoJr <picojr_dev@gmx.com>"]
 edition = "2021"

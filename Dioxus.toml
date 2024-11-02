@@ -1,7 +1,7 @@
 [application]
 
 # App (Project) Name
-name = "rocket-science-dioxus"
+name = "reasonably"
 
 # Dioxus App Default Platform
 # web, desktop, fullstack
@@ -16,7 +16,7 @@ asset_dir = "assets"
 [web.app]
 
 # HTML title tag content
-title = "rocket-science-dioxus"
+title = "reasonably"
 
 [web.watcher]
 
