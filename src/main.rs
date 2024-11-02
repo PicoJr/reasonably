@@ -1,16 +1,26 @@
 #![allow(non_snake_case)]
 
 mod simple_logs;
+mod repeatable_action;
+mod toggle_theme_action;
+mod research_once;
+mod code_action;
+mod debug_action;
 
-use simple_logs::SimpleLogs;
+use simple_logs::{SimpleLogs, Logs};
+use repeatable_action::RepeatableAction;
+use toggle_theme_action::ToggleThemeAction;
+use research_once::ResearchOnce;
 
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashSet};
 
 use break_infinity::{sum_geometric_series, Decimal};
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
 use async_std::task::sleep;
+use crate::code_action::CodeAction;
+use crate::debug_action::DebugAction;
 
 #[derive(Clone, Debug, PartialEq)]
 enum Theme {
@@ -34,146 +44,6 @@ fn main() {
 fn App() -> Element {
     rsx! {
         Router::<Route> {}
-    }
-}
-
-#[component]
-fn RepeatableAction(
-    mut logs: Signal<SimpleLogs>,
-    mut clicks: Signal<Decimal>,
-    loc: Signal<Decimal>,
-    produced: Signal<Decimal>,
-    button_name: String,
-    debug_message: String,
-    description: String,
-    loc_base_cost: Decimal,
-    loc_growth_rate: Decimal,
-) -> Element {
-    let new_instances = produced() + clicks();
-    let loc_cost = loc_base_cost * loc_growth_rate.pow(&new_instances);
-    let disabled = loc() < loc_cost;
-    rsx! {
-        div {
-            class: "repeatable-action",
-            p {"{description}"}
-            p {"Cost {loc_cost} loc"}
-            button {
-                disabled: disabled,
-                class: "repeatable-action-button",
-                onclick: move |_| {
-                clicks += Decimal::new(1.0);
-                logs.write().log(debug_message.as_str())
-            }
-            , {button_name} }
-        }
-    }
-}
-
-#[component]
-fn DebugAction(mut logs: Signal<SimpleLogs>, mut debug_clicks: Signal<Decimal>) -> Element {
-    rsx! {
-        button { onclick: move |_| {
-            debug_clicks += Decimal::new(1.0);
-            logs.write().log(
-                "debugging..."
-            )
-        }
-        , "Debug" }
-    }
-}
-
-#[component]
-fn CodeAction(mut logs: Signal<SimpleLogs>, mut code_clicks: Signal<Decimal>) -> Element {
-    rsx! {
-        button { onclick: move |_| {
-            code_clicks += Decimal::new(1.0);
-            logs.write().log(
-                "coding..."
-            )
-        }
-        , "Code" }
-    }
-}
-
-#[component]
-fn ToggleThemeAction(
-    mut logs: Signal<SimpleLogs>,
-    mut theme: Signal<Theme>,
-) -> Element {
-    let current_theme: Theme = theme();
-    rsx! {
-        button { onclick: move |_| {
-            match current_theme {
-                Theme::LightTheme => {
-                    *theme.write() = Theme::DarkTheme;
-                    logs.write().log(
-                        "toggling theme...now dark"
-                    );
-                    spawn(async move {
-                        eval(r#"
-                        document.documentElement.setAttribute('data-theme', "dark")
-                        "#,
-                        ).await.expect("failed to run JS");
-                    });
-                },
-                Theme::DarkTheme => {
-                    *theme.write() = Theme::LightTheme;
-                    logs.write().log(
-                        "toggling theme...now light"
-                    );
-                    spawn(async move {
-                        eval(r#"
-                        document.documentElement.setAttribute('data-theme', "light")
-                        "#,
-                        ).await.expect("failed to run JS");
-                    });
-                },
-            };
-        }
-        , "Toggle Theme" }
-    }
-}
-
-#[component]
-fn ResearchOnce(
-    mut logs: Signal<SimpleLogs>,
-    mut researched: Signal<HashSet<String>>,
-    mut loc: Signal<Decimal>,
-    research_name: String,
-    button_name: String,
-    debug_message: String,
-    description: String,
-    loc_cost: Decimal,
-) -> Element {
-    let disabled = loc() < loc_cost;
-    rsx! {
-        div {
-            class: "research",
-            p {"{description}"}
-            p {"Cost {loc_cost} loc"}
-            button {
-                class: "research-button",
-                disabled: disabled,
-                onclick: move |_| {
-                researched.write().insert(research_name.clone()) ;
-                logs.write().log(
-                    &debug_message
-                );
-                loc -= loc_cost;
-            }
-            , {button_name} }
-        }
-    }
-}
-
-
-#[component]
-fn Logs(logs: Signal<SimpleLogs>) -> Element {
-    rsx! {
-        div {
-            class: "logs",
-            {logs.read().render()}
-        }
     }
 }
 

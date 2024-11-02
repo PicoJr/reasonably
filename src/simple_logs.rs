@@ -1,4 +1,8 @@
 use std::collections::VecDeque;
+use dioxus::core_macro::{component, rsx};
+use dioxus::dioxus_core::Element;
+use dioxus::prelude::{Readable, Signal};
+use dioxus::prelude::*;
 
 pub(crate) struct SimpleLogs {
     max_lines: usize,
@@ -23,5 +27,15 @@ impl SimpleLogs {
             self.lines.pop_front();
         }
         self.lines.push_back(message.to_string());
+    }
+}
+
+#[component]
+pub(crate) fn Logs(logs: Signal<SimpleLogs>) -> Element {
+    rsx! {
+        div {
+            class: "logs",
+            {logs.read().render()}
+        }
     }
 }
