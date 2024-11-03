@@ -9,7 +9,7 @@ use crate::simple_logs::SimpleLogs;
 pub(crate) fn CodeAction(mut logs: Signal<SimpleLogs>, mut code_clicks: Signal<Decimal>) -> Element {
     rsx! {
         button {
-            class: "repeatable-action",
+            class: "repeatable-action-button",
             onclick: move |_| {
             code_clicks += Decimal::new(1.0);
             logs.write().log(

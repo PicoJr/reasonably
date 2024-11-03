@@ -6,16 +6,21 @@ use dioxus::prelude::*;
 use crate::simple_logs::SimpleLogs;
 
 #[component]
-pub(crate) fn DebugAction(mut logs: Signal<SimpleLogs>, mut debug_clicks: Signal<Decimal>) -> Element {
+pub(crate) fn CheatAction(
+    mut logs: Signal<SimpleLogs>,
+    mut value: Signal<Decimal>,
+    button_name: String,
+    debug_message: String,
+) -> Element {
     rsx! {
         button {
             class: "repeatable-action-button",
             onclick: move |_| {
-            debug_clicks += Decimal::new(1.0);
+            value *= Decimal::new(2.0);
             logs.write().log(
-                "debugging..."
+                debug_message.as_str()
             )
         }
-        , "Debug" }
+        , {button_name} }
     }
 }

@@ -14,7 +14,7 @@ pub(crate) fn ToggleThemeAction(
     let current_theme: Theme = theme();
     rsx! {
         button {
-            class: "repeatable-action",
+            class: "repeatable-action-button",
             onclick: move |_| {
             match current_theme {
                 Theme::LightTheme => {

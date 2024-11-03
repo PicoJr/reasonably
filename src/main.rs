@@ -8,6 +8,7 @@ mod code_action;
 mod debug_action;
 mod format_decimal;
 mod constants;
+mod cheat_action;
 
 use simple_logs::{SimpleLogs, Logs};
 use repeatable_action::RepeatableAction;
@@ -22,6 +23,7 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
 use async_std::task::sleep;
+use crate::cheat_action::CheatAction;
 use crate::code_action::CodeAction;
 use crate::constants::GameConstants;
 use crate::debug_action::DebugAction;
@@ -250,31 +252,36 @@ fn Home() -> Element {
                         logs,
                         code_clicks,
                     }
-                    button {
-                        onclick: move |_| {
-                            loc *= Decimal::new(2.0);
+                    CheatAction{
+                        logs: logs,
+                        value: loc,
+                        button_name: "cheat loc",
+                        debug_message: "cheating loc...",
                     }
-                    , {"cheat loc"} }
-                    button {
-                        onclick: move |_| {
-                            bugs *= Decimal::new(2.0);
+                    CheatAction{
+                        logs: logs,
+                        value: bugs,
+                        button_name: "cheat bugs",
+                        debug_message: "cheating bugs...",
                     }
-                    , {"cheat bugs"} }
-                    button {
-                        onclick: move |_| {
-                            interns *= Decimal::new(2.0);
+                    CheatAction{
+                        logs: logs,
+                        value: interns,
+                        button_name: "cheat interns",
+                        debug_message: "cheating interns...",
                     }
-                    , {"cheat interns"} }
-                    button {
-                        onclick: move |_| {
-                            junior_devs *= Decimal::new(2.0);
+                    CheatAction{
+                        logs: logs,
+                        value: junior_devs,
+                        button_name: "cheat junior devs",
+                        debug_message: "cheating junior devs...",
                     }
-                    , {"cheat junior devs"} }
-                    button {
-                        onclick: move |_| {
-                            senior_devs *= Decimal::new(2.0);
+                    CheatAction{
+                        logs: logs,
+                        value: senior_devs,
+                        button_name: "cheat senior devs",
+                        debug_message: "cheating senior devs...",
                     }
-                    , {"cheat senior devs"} }
                     button {
                         onclick: move |_| {
                             dt *= Decimal::new(2.0);
