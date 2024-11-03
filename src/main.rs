@@ -7,6 +7,7 @@ mod research_once;
 mod code_action;
 mod debug_action;
 mod format_decimal;
+mod constants;
 
 use simple_logs::{SimpleLogs, Logs};
 use repeatable_action::RepeatableAction;
@@ -22,6 +23,7 @@ use dioxus_logger::tracing::{info, Level};
 
 use async_std::task::sleep;
 use crate::code_action::CodeAction;
+use crate::constants::GameConstants;
 use crate::debug_action::DebugAction;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -51,20 +53,7 @@ fn App() -> Element {
 
 #[component]
 fn Home() -> Element {
-    // repeatable actions costs
-    let interns_loc_base_cost = Decimal::new(10.0);
-    let interns_loc_growth_rate = Decimal::new(1.1);
-    let junior_devs_loc_base_cost = Decimal::new(20.0);
-    let junior_devs_loc_growth_rate = Decimal::new(1.1);
-    let senior_devs_loc_base_cost = Decimal::new(40.0);
-    let senior_devs_loc_growth_rate = Decimal::new(1.1);
-
-    // research costs
-    let research_internship_loc_cost = Decimal::new(1.0);
-    let research_interns_promotion_loc_cost = Decimal::new(1.0);
-    let research_junior_devs_promotion_loc_cost = Decimal::new(1.0);
-    let research_code_metrics_loc_cost = Decimal::new(10.0);
-    let research_rmrf_loc_cost = Decimal::new(10.0);
+    let constants = GameConstants::default();
 
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
     let researched: Signal<HashSet<String>> = use_signal(HashSet::new);
@@ -83,13 +72,14 @@ fn Home() -> Element {
     let mut rmrf_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // production per clicks
-    let loc_per_clicks: Signal<Decimal> = use_signal(|| Decimal::new(1.0));
-    let debug_per_clicks: Signal<Decimal> = use_signal(|| Decimal::new(1.0));
+    let loc_per_clicks: Signal<Decimal> = use_signal(|| constants.loc_per_clicks);
+    let debug_per_clicks: Signal<Decimal> = use_signal(|| constants.debug_per_clicks);
 
-    let manual_bugs_ratio: Signal<Decimal> = use_signal(|| Decimal::new(1.0));
-    let interns_bugs_ratio: Signal<Decimal> = use_signal(|| Decimal::new(2.0));
-    let junior_devs_bugs_ratio: Signal<Decimal> = use_signal(|| Decimal::new(1.5));
-    let senior_devs_bugs_ratio: Signal<Decimal> = use_signal(|| Decimal::new(1.0));
+    // bugs ratio
+    let manual_bugs_ratio: Signal<Decimal> = use_signal(|| constants.manual_bugs_ratio);
+    let interns_bugs_ratio: Signal<Decimal> = use_signal(|| constants.interns_bugs_ratio);
+    let junior_devs_bugs_ratio: Signal<Decimal> = use_signal(|| constants.junior_devs_bugs_ratio);
+    let senior_devs_bugs_ratio: Signal<Decimal> = use_signal(|| constants.senior_devs_bugs_ratio);
 
     // resources
     let mut loc: Signal<Decimal> = use_signal(|| Decimal::ZERO);
@@ -97,11 +87,11 @@ fn Home() -> Element {
 
     // producers
     let mut interns: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let interns_loc_dt: Signal<Decimal> = use_signal(|| Decimal::new(1.0));
+    let interns_loc_dt: Signal<Decimal> = use_signal(|| constants.interns_loc_dt);
     let mut junior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let junior_devs_loc_dt: Signal<Decimal> = use_signal(|| Decimal::new(1.5));
+    let junior_devs_loc_dt: Signal<Decimal> = use_signal(|| constants.junior_devs_loc_dt);
     let mut senior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let senior_devs_loc_dt: Signal<Decimal> = use_signal(|| Decimal::new(2.0));
+    let senior_devs_loc_dt: Signal<Decimal> = use_signal(|| constants.senior_devs_loc_dt);
     let mut retired_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // placeholder
@@ -109,11 +99,11 @@ fn Home() -> Element {
 
     // promotions & retirement
     // interns -> junior devs
-    let interns_promotion_ratio_dt: Signal<Decimal> = use_signal(|| Decimal::new(0.04));
+    let interns_promotion_ratio_dt: Signal<Decimal> = use_signal(|| constants.interns_promotion_ratio_dt);
     // junior devs -> senior_devs
-    let junior_devs_promotion_ratio_dt: Signal<Decimal> = use_signal(|| Decimal::new(0.02));
+    let junior_devs_promotion_ratio_dt: Signal<Decimal> = use_signal(|| constants.junior_devs_promotion_ratio_dt);
     // senior_devs -> retired_devs
-    let senior_devs_retirement_ratio_dt: Signal<Decimal> = use_signal(|| Decimal::new(0.01));
+    let senior_devs_retirement_ratio_dt: Signal<Decimal> = use_signal(|| constants.senior_devs_retirement_ratio_dt);
 
     // simulation time between 2 updates
     let mut dt: Signal<Decimal> = use_signal(|| Decimal::new(0.01));
@@ -138,22 +128,22 @@ fn Home() -> Element {
             // must be computed before incrementing interns
             let manual_interns_loc_cost = sum_geometric_series(
                 &manual_interns,
-                &interns_loc_base_cost,
-                &interns_loc_growth_rate,
+                &constants.interns_loc_base_cost,
+                &constants.interns_loc_growth_rate,
                 &interns(),
             );
             // must be computed before incrementing junior_devs
             let manual_junior_devs_loc_cost = sum_geometric_series(
                 &manual_junior_devs,
-                &junior_devs_loc_base_cost,
-                &junior_devs_loc_growth_rate,
+                &constants.junior_devs_loc_base_cost,
+                &constants.junior_devs_loc_growth_rate,
                 &junior_devs(),
             );
             // must be computed before incrementing senior_devs
             let manual_senior_devs_loc_cost = sum_geometric_series(
                 &manual_senior_devs,
-                &senior_devs_loc_base_cost,
-                &senior_devs_loc_growth_rate,
+                &constants.senior_devs_loc_base_cost,
+                &constants.senior_devs_loc_growth_rate,
                 &senior_devs(),
             );
 
@@ -301,9 +291,11 @@ fn Home() -> Element {
                             debug_clicks,
                         }
                     }
-                    ToggleThemeAction {
-                        logs: logs,
-                        theme: theme,
+                    if researched().contains("toggle_theme") {
+                        ToggleThemeAction {
+                            logs: logs,
+                            theme: theme,
+                        }
                     }
                     if researched().contains("internship") {
                         RepeatableAction{
@@ -314,8 +306,8 @@ fn Home() -> Element {
                             button_name: "hire intern",
                             debug_message: "hiring an intern...",
                             description: "Produces loc, and bugs",
-                            loc_base_cost: interns_loc_base_cost,
-                            loc_growth_rate: interns_loc_growth_rate,
+                            loc_base_cost: constants.interns_loc_base_cost,
+                            loc_growth_rate: constants.interns_loc_growth_rate,
                         }
                     }
                     if researched().contains("internship") {
@@ -327,8 +319,8 @@ fn Home() -> Element {
                             button_name: "hire junior dev",
                             debug_message: "hiring a junior dev...",
                             description: "Produces loc, and bugs",
-                            loc_base_cost: junior_devs_loc_base_cost,
-                            loc_growth_rate: junior_devs_loc_growth_rate,
+                            loc_base_cost: constants.junior_devs_loc_base_cost,
+                            loc_growth_rate: constants.junior_devs_loc_growth_rate,
                         }
                     }
                     if researched().contains("internship") {
@@ -340,8 +332,8 @@ fn Home() -> Element {
                             button_name: "hire senior dev",
                             debug_message: "hiring a senior dev...",
                             description: "Produces loc, and bugs",
-                            loc_base_cost: senior_devs_loc_base_cost,
-                            loc_growth_rate: senior_devs_loc_growth_rate,
+                            loc_base_cost: constants.senior_devs_loc_base_cost,
+                            loc_growth_rate: constants.senior_devs_loc_growth_rate,
                         }
                     }
                     if researched().contains("rmrf") {
@@ -369,7 +361,7 @@ fn Home() -> Element {
                             button_name: "research internship",
                             debug_message: "intership researched",
                             description: "Allow hiring interns, who produce loc and bugs automaticaly.",
-                            loc_cost: research_internship_loc_cost,
+                            loc_cost: constants.research_internship_loc_cost,
                         }
                     }
                     if !researched().contains("code_metrics") {
@@ -381,7 +373,7 @@ fn Home() -> Element {
                             button_name: "research code metrics",
                             debug_message: "code metrics researched",
                             description: "Display LOC/s and bugs/s.",
-                            loc_cost: research_code_metrics_loc_cost,
+                            loc_cost: constants.research_code_metrics_loc_cost,
                         }
                     }
                     if !researched().contains("rmrf") {
@@ -393,7 +385,7 @@ fn Home() -> Element {
                             button_name: "learn rm -rf",
                             debug_message: "rm -rf researched",
                             description: "For desperate situations, allow using rm-rf command",
-                            loc_cost: research_rmrf_loc_cost,
+                            loc_cost: constants.research_rmrf_loc_cost,
                         }
                     }
                     if !researched().contains("interns_promotion") {
@@ -405,7 +397,7 @@ fn Home() -> Element {
                             button_name: "promote interns",
                             debug_message: "interns promotion researched",
                             description: "Allow interns to be promoted to junior devs",
-                            loc_cost: research_interns_promotion_loc_cost,
+                            loc_cost: constants.research_interns_promotion_loc_cost,
                         }
                     }
                     if !researched().contains("junior_devs_promotion") {
@@ -417,7 +409,19 @@ fn Home() -> Element {
                             button_name: "promote junior devs",
                             debug_message: "junior devs promotion researched",
                             description: "Allow junior devs to be promoted to senior devs",
-                            loc_cost: research_junior_devs_promotion_loc_cost,
+                            loc_cost: constants.research_junior_devs_promotion_loc_cost,
+                        }
+                    }
+                    if !researched().contains("toggle_theme") {
+                        ResearchOnce{
+                            logs: logs,
+                            researched: researched,
+                            loc: loc,
+                            research_name: "toggle_theme",
+                            button_name: "install theme",
+                            debug_message: "toggle theme researched",
+                            description: "Allow toggling theme",
+                            loc_cost: constants.research_toggle_theme_loc_cost,
                         }
                     }
                 }

@@ -13,7 +13,9 @@ pub(crate) fn ToggleThemeAction(
 ) -> Element {
     let current_theme: Theme = theme();
     rsx! {
-        button { onclick: move |_| {
+        button {
+            class: "repeatable-action",
+            onclick: move |_| {
             match current_theme {
                 Theme::LightTheme => {
                     *theme.write() = Theme::DarkTheme;
