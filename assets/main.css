@@ -40,7 +40,11 @@ body {
 }
 
 .logs {
-    height: 10%;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow: hidden;
+    height: 5em;
+    line-height: 1em;
     display: flex;
     flex-direction: column;
 }
@@ -49,6 +53,7 @@ body {
     height: 10%;
     display: flex;
     flex-direction: column;
+    animation: fadeIn var(--fade-duration);
 }
 
 .interactions {
@@ -88,7 +93,6 @@ body {
 #links a {
     color: white;
     text-decoration: none;
-    margin-top: 20px;
     margin: 10px;
     border: white 1px solid;
     border-radius: 5px;

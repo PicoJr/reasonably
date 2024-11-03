@@ -9,6 +9,7 @@ mod debug_action;
 mod format_decimal;
 mod constants;
 mod cheat_action;
+mod metrics;
 
 use simple_logs::{SimpleLogs, Logs};
 use repeatable_action::RepeatableAction;
@@ -27,6 +28,7 @@ use crate::cheat_action::CheatAction;
 use crate::code_action::CodeAction;
 use crate::constants::GameConstants;
 use crate::debug_action::DebugAction;
+use crate::metrics::Metrics;
 
 #[derive(Clone, Debug, PartialEq)]
 enum Theme {
@@ -58,7 +60,13 @@ fn Home() -> Element {
     let constants = GameConstants::default();
 
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
-    let researched: Signal<HashSet<String>> = use_signal(HashSet::new);
+    let researched: Signal<HashSet<String>> = use_signal(
+        || {
+            let mut researches = HashSet::new();
+            researches.insert("cheating".to_string());
+            researches
+        }
+    );
     let theme: Signal<Theme> = use_signal(|| Theme::LightTheme);
 
     // stats
@@ -221,9 +229,13 @@ fn Home() -> Element {
             div { // vertical
                 class: "metrics",
                 if researched().contains("code_metrics") {
-                    p {"LOC/s {format_decimal_loc(loc_dt())}"}
-                    p {"bugs/s {format_decimal_bugs(bugs_dt())}"}
-                    p {"dt {dt()}"}
+                    Metrics {
+                        logs: logs,
+                        researched: researched,
+                        loc_dt: loc_dt,
+                        bugs_dt: bugs_dt,
+                        dt: dt,
+                    }
                 }
                 if interns() > Decimal::ZERO {
                     p {"Interns {format_decimal_devs(interns())}"}
@@ -252,46 +264,48 @@ fn Home() -> Element {
                         logs,
                         code_clicks,
                     }
-                    CheatAction{
-                        logs: logs,
-                        value: loc,
-                        button_name: "cheat loc",
-                        debug_message: "cheating loc...",
+                    if researched().contains("cheating") {
+                        CheatAction{
+                            logs: logs,
+                            value: loc,
+                            button_name: "cheat loc",
+                            debug_message: "cheating loc...",
+                        }
+                        CheatAction{
+                            logs: logs,
+                            value: bugs,
+                            button_name: "cheat bugs",
+                            debug_message: "cheating bugs...",
+                        }
+                        CheatAction{
+                            logs: logs,
+                            value: interns,
+                            button_name: "cheat interns",
+                            debug_message: "cheating interns...",
+                        }
+                        CheatAction{
+                            logs: logs,
+                            value: junior_devs,
+                            button_name: "cheat junior devs",
+                            debug_message: "cheating junior devs...",
+                        }
+                        CheatAction{
+                            logs: logs,
+                            value: senior_devs,
+                            button_name: "cheat senior devs",
+                            debug_message: "cheating senior devs...",
+                        }
+                        button {
+                            onclick: move |_| {
+                                dt *= Decimal::new(2.0);
+                        }
+                        , {"cheat time faster"} }
+                        button {
+                            onclick: move |_| {
+                                dt /= Decimal::new(2.0);
+                        }
+                        , {"cheat time slower"} }
                     }
-                    CheatAction{
-                        logs: logs,
-                        value: bugs,
-                        button_name: "cheat bugs",
-                        debug_message: "cheating bugs...",
-                    }
-                    CheatAction{
-                        logs: logs,
-                        value: interns,
-                        button_name: "cheat interns",
-                        debug_message: "cheating interns...",
-                    }
-                    CheatAction{
-                        logs: logs,
-                        value: junior_devs,
-                        button_name: "cheat junior devs",
-                        debug_message: "cheating junior devs...",
-                    }
-                    CheatAction{
-                        logs: logs,
-                        value: senior_devs,
-                        button_name: "cheat senior devs",
-                        debug_message: "cheating senior devs...",
-                    }
-                    button {
-                        onclick: move |_| {
-                            dt *= Decimal::new(2.0);
-                    }
-                    , {"cheat time faster"} }
-                    button {
-                        onclick: move |_| {
-                            dt /= Decimal::new(2.0);
-                    }
-                    , {"cheat time slower"} }
                     if bugs() > Decimal::ZERO {
                         DebugAction {
                             logs,
