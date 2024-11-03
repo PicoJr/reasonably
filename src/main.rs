@@ -10,6 +10,7 @@ mod format_decimal;
 mod constants;
 mod cheat_action;
 mod metrics;
+mod resources;
 
 use simple_logs::{SimpleLogs, Logs};
 use repeatable_action::RepeatableAction;
@@ -29,6 +30,7 @@ use crate::code_action::CodeAction;
 use crate::constants::GameConstants;
 use crate::debug_action::DebugAction;
 use crate::metrics::Metrics;
+use crate::resources::Resources;
 
 #[derive(Clone, Debug, PartialEq)]
 enum Theme {
@@ -230,30 +232,21 @@ fn Home() -> Element {
                 class: "metrics",
                 if researched().contains("code_metrics") {
                     Metrics {
-                        logs: logs,
                         researched: researched,
                         loc_dt: loc_dt,
                         bugs_dt: bugs_dt,
                         dt: dt,
                     }
                 }
-                if interns() > Decimal::ZERO {
-                    p {"Interns {format_decimal_devs(interns())}"}
-                }
-                if junior_devs() > Decimal::ZERO {
-                    p {"Junior devs {format_decimal_devs(junior_devs())}"}
-                }
-                if senior_devs() > Decimal::ZERO {
-                    p {"Senior devs {format_decimal_devs(senior_devs())}"}
-                }
-                if retired_devs() > Decimal::ZERO {
-                    p {"Retired devs {format_decimal_devs(retired_devs())}"}
-                }
                 if loc() > Decimal::ZERO {
-                    p {"Lines of code {format_decimal_loc(loc())}"}
-                }
-                if bugs() > Decimal::ZERO {
-                    p {"Bugs {format_decimal_bugs(bugs())}"}
+                    Resources {
+                        loc: loc,
+                        bugs: bugs,
+                        interns: interns,
+                        junior_devs: junior_devs,
+                        senior_devs: senior_devs,
+                        retired_devs: retired_devs,
+                    }
                 }
             }
             div { // horizontal

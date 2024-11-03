@@ -9,7 +9,6 @@ use crate::format_decimal::{format_decimal_loc, format_decimal_bugs};
 
 #[component]
 pub(crate) fn Metrics(
-    mut logs: Signal<SimpleLogs>,
     researched: Signal<HashSet<String>>,
     loc_dt: Signal<Decimal>,
     bugs_dt: Signal<Decimal>,
@@ -21,21 +20,36 @@ pub(crate) fn Metrics(
             table {
                 class: "metrics-table",
                 tr {
-                    th {"metrics"}
-                    th {"value"}
+                    th {
+                        class: "table-name",
+                        "metrics"
+                    }
+                    th {
+                        class: "table-value",
+                        "value"
+                    }
                 }
                 tr {
                     td {"LOC/s"}
-                    td {"{format_decimal_loc(loc_dt())}"}
+                    td {
+                        class: "table-value",
+                        "{format_decimal_loc(loc_dt())}"
+                    }
                 }
                 tr {
                     td {"bugs/s"}
-                    td {"{format_decimal_bugs(bugs_dt())}"}
+                    td {
+                        class: "table-value",
+                        "{format_decimal_bugs(bugs_dt())}"
+                    }
                 }
                 if researched().contains("cheating") {
                     tr {
                         td {"dt"}
-                        td {"{dt()}"}
+                        td {
+                            class: "table-value",
+                            "{dt()}"
+                        }
                     }
                 }
             }
