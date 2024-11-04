@@ -162,14 +162,14 @@ fn Home() -> Element {
             // loc produced by interns, ...
             let auto_loc = (
                 interns() * interns_loc_dt()
-                + junior_devs() * junior_devs_loc_dt()
-                + senior_devs() * senior_devs_loc_dt()
+                    + junior_devs() * junior_devs_loc_dt()
+                    + senior_devs() * senior_devs_loc_dt()
             ) * dt();
             // bugs produced by interns, ...
             let auto_bugs = (
                 interns() * interns_loc_dt() * interns_bugs_ratio()
-                + junior_devs() * junior_devs_loc_dt() * junior_devs_bugs_ratio()
-                + senior_devs() * senior_devs_loc_dt() * senior_devs_bugs_ratio()
+                    + junior_devs() * junior_devs_loc_dt() * junior_devs_bugs_ratio()
+                    + senior_devs() * senior_devs_loc_dt() * senior_devs_bugs_ratio()
             ) * dt();
 
             // update loc, accounting all sources
@@ -223,6 +223,95 @@ fn Home() -> Element {
             sleep(std::time::Duration::from_millis(dt_milliseconds)).await;
         }
     });
+
+    let research_rendered = vec![
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                research_name: "toggle_theme",
+                button_name: "install theme",
+                debug_message: "toggle theme researched",
+                description: "Allow toggling theme",
+                loc_cost: constants.research_toggle_theme_loc_cost,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                research_name: "internship",
+                button_name: "research internship",
+                debug_message: "intership researched",
+                description: "Allow hiring interns, who produce loc and bugs automaticaly.",
+                loc_cost: constants.research_internship_loc_cost,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                research_name: "code_metrics",
+                button_name: "research code metrics",
+                debug_message: "code metrics researched",
+                description: "Display LOC/s and bugs/s.",
+                loc_cost: constants.research_code_metrics_loc_cost,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                research_name: "rmrf",
+                button_name: "learn rm -rf",
+                debug_message: "rm -rf researched",
+                description: "For desperate situations, allow using rm-rf command",
+                loc_cost: constants.research_rmrf_loc_cost,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                require: Some("internship".to_string()),
+                research_name: "interns_promotion",
+                button_name: "promote interns",
+                debug_message: "interns promotion researched",
+                description: "Allow interns to be promoted to junior devs",
+                loc_cost: constants.research_interns_promotion_loc_cost,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                require: Some("interns_promotion".to_string()),
+                research_name: "junior_devs_promotion",
+                button_name: "promote junior devs",
+                debug_message: "junior devs promotion researched",
+                description: "Allow junior devs to be promoted to senior devs",
+                loc_cost: constants.research_junior_devs_promotion_loc_cost,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                research_name: "toggle_theme",
+                button_name: "install theme",
+                debug_message: "toggle theme researched",
+                description: "Allow toggling theme",
+                loc_cost: constants.research_toggle_theme_loc_cost,
+            }
+        },
+    ].into_iter();
 
     rsx! {
         div { // vertical
@@ -366,68 +455,7 @@ fn Home() -> Element {
                 }
                 div { // vertical
                     class: "researches",
-                    ResearchOnce{
-                        logs: logs,
-                        researched: researched,
-                        loc: loc,
-                        research_name: "internship",
-                        button_name: "research internship",
-                        debug_message: "intership researched",
-                        description: "Allow hiring interns, who produce loc and bugs automaticaly.",
-                        loc_cost: constants.research_internship_loc_cost,
-                    }
-                    ResearchOnce{
-                        logs: logs,
-                        researched: researched,
-                        loc: loc,
-                        research_name: "code_metrics",
-                        button_name: "research code metrics",
-                        debug_message: "code metrics researched",
-                        description: "Display LOC/s and bugs/s.",
-                        loc_cost: constants.research_code_metrics_loc_cost,
-                    }
-                    ResearchOnce{
-                        logs: logs,
-                        researched: researched,
-                        loc: loc,
-                        research_name: "rmrf",
-                        button_name: "learn rm -rf",
-                        debug_message: "rm -rf researched",
-                        description: "For desperate situations, allow using rm-rf command",
-                        loc_cost: constants.research_rmrf_loc_cost,
-                    }
-                    ResearchOnce{
-                        logs: logs,
-                        researched: researched,
-                        loc: loc,
-                        require: Some("internship".to_string()),
-                        research_name: "interns_promotion",
-                        button_name: "promote interns",
-                        debug_message: "interns promotion researched",
-                        description: "Allow interns to be promoted to junior devs",
-                        loc_cost: constants.research_interns_promotion_loc_cost,
-                    }
-                    ResearchOnce{
-                        logs: logs,
-                        researched: researched,
-                        loc: loc,
-                        require: Some("interns_promotion".to_string()),
-                        research_name: "junior_devs_promotion",
-                        button_name: "promote junior devs",
-                        debug_message: "junior devs promotion researched",
-                        description: "Allow junior devs to be promoted to senior devs",
-                        loc_cost: constants.research_junior_devs_promotion_loc_cost,
-                    }
-                    ResearchOnce{
-                        logs: logs,
-                        researched: researched,
-                        loc: loc,
-                        research_name: "toggle_theme",
-                        button_name: "install theme",
-                        debug_message: "toggle theme researched",
-                        description: "Allow toggling theme",
-                        loc_cost: constants.research_toggle_theme_loc_cost,
-                    }
+                    {research_rendered}
                 }
             }
         }
