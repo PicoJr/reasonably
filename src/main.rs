@@ -17,7 +17,6 @@ use simple_logs::{SimpleLogs, Logs};
 use repeatable_action::RepeatableAction;
 use toggle_theme_action::ToggleThemeAction;
 use research_once::ResearchOnce;
-use format_decimal::{format_decimal_devs, format_decimal_bugs, format_decimal_loc};
 
 use std::collections::{HashSet};
 use web_time::{Instant};
