@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Readable, Signal};
@@ -32,11 +32,16 @@ impl SimpleLogs {
 }
 
 #[component]
-pub(crate) fn Logs(logs: Signal<SimpleLogs>) -> Element {
+pub(crate) fn Logs(
+    researched: Signal<HashSet<String>>,
+    logs: Signal<SimpleLogs>
+) -> Element {
     rsx! {
-        div {
-            class: "logs",
-            {logs.read().render()}
+        if researched().contains("logs") {
+            div {
+                class: "logs",
+                {logs.read().render()}
+            }
         }
     }
 }

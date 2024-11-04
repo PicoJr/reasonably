@@ -285,6 +285,18 @@ fn Home() -> Element {
                 logs: logs,
                 researched: researched,
                 loc: loc,
+                research_name: "logs",
+                button_name: "research logs",
+                debug_message: "logs researched",
+                description: "Display logs",
+                loc_cost: constants.research_logs_loc_cost,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
                 research_name: "rmrf",
                 button_name: "learn rm -rf",
                 debug_message: "rm -rf researched",
@@ -335,7 +347,10 @@ fn Home() -> Element {
     rsx! {
         div { // vertical
             class: "everything",
-            Logs {logs}
+            Logs {
+                researched: researched,
+                logs: logs,
+            }
             div { // vertical
                 class: "metrics",
                 Speedrun {
