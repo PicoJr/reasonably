@@ -242,6 +242,7 @@ fn Home() -> Element {
                 debug_message: "toggle theme researched",
                 description: "Allow toggling theme",
                 loc_cost: constants.research_toggle_theme_loc_cost,
+                quest: false,
             }
         },
         rsx! {
@@ -254,6 +255,7 @@ fn Home() -> Element {
                 debug_message: "intership researched",
                 description: "Allow hiring interns, who produce loc and bugs automatically.",
                 loc_cost: constants.research_internship_loc_cost,
+                quest: false,
             }
         },
         rsx! {
@@ -266,6 +268,7 @@ fn Home() -> Element {
                 debug_message: "code metrics researched",
                 description: "Display LOC/s and bugs/s.",
                 loc_cost: constants.research_code_metrics_loc_cost,
+                quest: false,
             }
         },
         rsx! {
@@ -278,6 +281,7 @@ fn Home() -> Element {
                 debug_message: "speedrun researched",
                 description: "Display progress and real time timer",
                 loc_cost: constants.research_speedrun_loc_cost,
+                quest: false,
             }
         },
         rsx! {
@@ -290,6 +294,7 @@ fn Home() -> Element {
                 debug_message: "logs researched",
                 description: "Display logs",
                 loc_cost: constants.research_logs_loc_cost,
+                quest: false,
             }
         },
         rsx! {
@@ -302,6 +307,7 @@ fn Home() -> Element {
                 debug_message: "rm -rf researched",
                 description: "For desperate situations, allow using rm-rf command",
                 loc_cost: constants.research_rmrf_loc_cost,
+                quest: false,
             }
         },
         rsx! {
@@ -315,6 +321,7 @@ fn Home() -> Element {
                 debug_message: "interns promotion researched",
                 description: "Allow interns to be promoted to junior devs",
                 loc_cost: constants.research_interns_promotion_loc_cost,
+                quest: false,
             }
         },
         rsx! {
@@ -328,6 +335,7 @@ fn Home() -> Element {
                 debug_message: "junior devs promotion researched",
                 description: "Allow junior devs to be promoted to senior devs",
                 loc_cost: constants.research_junior_devs_promotion_loc_cost,
+                quest: false,
             }
         },
         rsx! {
@@ -340,6 +348,20 @@ fn Home() -> Element {
                 debug_message: "toggle theme researched",
                 description: "Allow toggling theme",
                 loc_cost: constants.research_toggle_theme_loc_cost,
+                quest: false,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                research_name: "hello_world",
+                button_name: "code hello world",
+                debug_message: "code hello world",
+                description: "Your first program",
+                loc_cost: constants.quest_hello_world_loc_cost,
+                quest: true,
             }
         },
     ].into_iter();

@@ -19,7 +19,13 @@ pub(crate) fn ResearchOnce(
     debug_message: String,
     description: String,
     loc_cost: Decimal,
+    quest: bool,
 ) -> Element {
+    let (css_class, css_button_class) = if quest {
+        ("quest", "quest-button")
+    } else {
+        ("research", "research-button")
+    };
     let disabled = loc() < loc_cost;
     // only show if not researched already
     let already_researched = researched().contains(research_name.as_str());
@@ -30,11 +36,11 @@ pub(crate) fn ResearchOnce(
     rsx! {
         if !already_researched && requirements_met {
             div {
-                class: "research",
+                class: css_class,
                 p {"{description}"}
                 p {"Cost {loc_cost} loc"}
                 button {
-                    class: "research-button",
+                    class: css_button_class,
                     disabled: disabled,
                     onclick: move |_| {
                     researched.write().insert(research_name.clone()) ;

@@ -1,24 +1,32 @@
 :root {
-    --bg-color: #ffffff;
-    --text-color: #121416d8;
-    --research-bg-color: #cfcfcf;
-    --button-bg-color: #9bbaff;
-    --button-disabled-bg-color: #7a7a7a;
+    --bg-color: #e3f2fb;
+    --text-color: #000000;
+    --research-bg-color: #65b4ec;
+    --quest-bg-color: #abc591;
+    --research-button-bg-color: #65b4ec;
+    --quest-button-bg-color:  #abc591;
+    --button-disabled-bg-color: #858585;
     --fade-duration: 1s;
 }
 
 [data-theme='light'] {
-    --bg-color: #fff;
-    --text-color: #121416d8;
-    --research-bg-color: #cfcfcf;
-    --button-bg-color: #9bbaff;
+    --bg-color: #e3f2fb;
+    --text-color: #000000;
+    --research-bg-color: #65b4ec;
+    --quest-bg-color: #abc591;
+    --research-button-bg-color: #65b4ec;
+    --quest-button-bg-color: #abc591;
+    --button-disabled-bg-color: #858585;
 }
 
 [data-theme='dark'] {
-    --bg-color: #212a2e;
-    --text-color: #F7F8F8;
-    --research-bg-color: #555555;
-    --button-bg-color: #25459f;
+    --bg-color: #282828;
+    --text-color: #fbf1c7;
+    --research-bg-color: #458588;
+    --quest-bg-color: #d79921;
+    --research-button-bg-color: #458588;
+    --quest-button-bg-color: #d79921;
+    --button-disabled-bg-color: #858585;
 }
 
 body {
@@ -137,14 +145,36 @@ body {
     animation: fadeIn var(--fade-duration);
 }
 
+.quest {
+    width:300px;
+    margin: 1px;
+    background-color: var(--quest-bg-color);
+    color: var(--text-color);
+    animation: fadeIn var(--fade-duration);
+}
+
 .research-button {
     width:300px;
     margin: 1px;
-    background-color: var(--button-bg-color);
+    background-color: var(--research-button-bg-color);
     color: var(--text-color);
 }
 
 .research-button:disabled {
+    width:300px;
+    margin: 1px;
+    background-color: var(--button-disabled-bg-color);
+    color: var(--text-color);
+}
+
+.quest-button {
+    width:300px;
+    margin: 1px;
+    background-color: var(--quest-button-bg-color);
+    color: var(--text-color);
+}
+
+.quest-button:disabled {
     width:300px;
     margin: 1px;
     background-color: var(--button-disabled-bg-color);
@@ -162,7 +192,7 @@ body {
 .repeatable-action-button {
     width:300px;
     margin: 1px;
-    background-color: var(--button-bg-color);
+    background-color: var(--research-button-bg-color);
     color: var(--text-color);
     animation: fadeIn var(--fade-duration);
 }

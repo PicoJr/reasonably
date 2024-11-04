@@ -2,7 +2,7 @@
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Signal, Writable};
+use dioxus::prelude::{Signal};
 use dioxus::prelude::*;
 use crate::format_decimal::{format_decimal_loc, format_decimal_bugs, format_decimal_devs};
 
