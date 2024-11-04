@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
@@ -10,8 +11,10 @@ use crate::format_decimal::format_decimal_loc;
 #[component]
 pub(crate) fn RepeatableAction(
     mut logs: Signal<SimpleLogs>,
+    mut researched: Signal<HashSet<String>>,
     mut clicks: Signal<Decimal>,
     loc: Signal<Decimal>,
+    require: Option<String>,
     produced: Signal<Decimal>,
     button_name: String,
     debug_message: String,
@@ -19,22 +22,28 @@ pub(crate) fn RepeatableAction(
     loc_base_cost: Decimal,
     loc_growth_rate: Decimal,
 ) -> Element {
+    let requirements_met = require.map_or_else(
+        || true,
+        |research_name_required| researched().contains(research_name_required.as_str())
+    );
     let new_instances = produced() + clicks();
     let loc_cost = loc_base_cost * loc_growth_rate.pow(&new_instances);
     let disabled = loc() < loc_cost;
     rsx! {
-        div {
-            class: "repeatable-action",
-            p {"{description}"}
-            p {"Cost {format_decimal_loc(loc_cost)}"}
-            button {
-                disabled: disabled,
-                class: "repeatable-action-button",
-                onclick: move |_| {
-                clicks += Decimal::new(1.0);
-                logs.write().log(debug_message.as_str())
+        if requirements_met {
+            div {
+                class: "repeatable-action",
+                p {"{description}"}
+                p {"Cost {format_decimal_loc(loc_cost)}"}
+                button {
+                    disabled: disabled,
+                    class: "repeatable-action-button",
+                    onclick: move |_| {
+                    clicks += Decimal::new(1.0);
+                    logs.write().log(debug_message.as_str())
+                }
+                , {button_name} }
             }
-            , {button_name} }
         }
     }
 }

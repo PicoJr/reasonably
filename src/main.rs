@@ -257,6 +257,70 @@ fn Home() -> Element {
                         logs,
                         code_clicks,
                     }
+                    if bugs() > Decimal::ZERO {
+                        DebugAction {
+                            logs,
+                            debug_clicks,
+                        }
+                    }
+                    ToggleThemeAction {
+                        logs: logs,
+                        researched: researched,
+                        theme: theme,
+                        require: Some("toggle_theme".to_string()),
+                    }
+                    RepeatableAction{
+                        logs: logs,
+                        researched: researched,
+                        clicks: interns_clicks,
+                        loc: loc,
+                        require: Some("internship".to_string()),
+                        produced: interns,
+                        button_name: "hire intern",
+                        debug_message: "hiring an intern...",
+                        description: "Produces loc, and bugs",
+                        loc_base_cost: constants.interns_loc_base_cost,
+                        loc_growth_rate: constants.interns_loc_growth_rate,
+                    }
+                    RepeatableAction{
+                        logs: logs,
+                        researched: researched,
+                        clicks: junior_devs_clicks,
+                        loc: loc,
+                        require: Some("junior_position".to_string()),
+                        produced: junior_devs,
+                        button_name: "hire junior dev",
+                        debug_message: "hiring a junior dev...",
+                        description: "Produces loc, and bugs",
+                        loc_base_cost: constants.junior_devs_loc_base_cost,
+                        loc_growth_rate: constants.junior_devs_loc_growth_rate,
+                    }
+                    RepeatableAction{
+                        logs: logs,
+                        researched: researched,
+                        clicks: senior_devs_clicks,
+                        loc: loc,
+                        require: Some("senior_position".to_string()),
+                        produced: senior_devs,
+                        button_name: "hire senior dev",
+                        debug_message: "hiring a senior dev...",
+                        description: "Produces loc, and bugs",
+                        loc_base_cost: constants.senior_devs_loc_base_cost,
+                        loc_growth_rate: constants.senior_devs_loc_growth_rate,
+                    }
+                    RepeatableAction{
+                        logs: logs,
+                        researched: researched,
+                        clicks: rmrf_clicks,
+                        loc: loc,
+                        require: Some("rmrf".to_string()),
+                        produced: placeholder,
+                        button_name: "rm -rf",
+                        debug_message: "running rm -rf...",
+                        description: "Wipe out all loc and bugs",
+                        loc_base_cost: Decimal::ZERO,
+                        loc_growth_rate: Decimal::ONE,
+                    }
                     if researched().contains("cheating") {
                         CheatAction{
                             logs: logs,
@@ -299,144 +363,70 @@ fn Home() -> Element {
                         }
                         , {"cheat time slower"} }
                     }
-                    if bugs() > Decimal::ZERO {
-                        DebugAction {
-                            logs,
-                            debug_clicks,
-                        }
-                    }
-                    if researched().contains("toggle_theme") {
-                        ToggleThemeAction {
-                            logs: logs,
-                            theme: theme,
-                        }
-                    }
-                    if researched().contains("internship") {
-                        RepeatableAction{
-                            logs: logs,
-                            clicks: interns_clicks,
-                            loc: loc,
-                            produced: interns,
-                            button_name: "hire intern",
-                            debug_message: "hiring an intern...",
-                            description: "Produces loc, and bugs",
-                            loc_base_cost: constants.interns_loc_base_cost,
-                            loc_growth_rate: constants.interns_loc_growth_rate,
-                        }
-                    }
-                    if researched().contains("internship") {
-                        RepeatableAction{
-                            logs: logs,
-                            clicks: junior_devs_clicks,
-                            loc: loc,
-                            produced: junior_devs,
-                            button_name: "hire junior dev",
-                            debug_message: "hiring a junior dev...",
-                            description: "Produces loc, and bugs",
-                            loc_base_cost: constants.junior_devs_loc_base_cost,
-                            loc_growth_rate: constants.junior_devs_loc_growth_rate,
-                        }
-                    }
-                    if researched().contains("internship") {
-                        RepeatableAction{
-                            logs: logs,
-                            clicks: senior_devs_clicks,
-                            loc: loc,
-                            produced: senior_devs,
-                            button_name: "hire senior dev",
-                            debug_message: "hiring a senior dev...",
-                            description: "Produces loc, and bugs",
-                            loc_base_cost: constants.senior_devs_loc_base_cost,
-                            loc_growth_rate: constants.senior_devs_loc_growth_rate,
-                        }
-                    }
-                    if researched().contains("rmrf") {
-                        RepeatableAction{
-                            logs: logs,
-                            clicks: rmrf_clicks,
-                            loc: loc,
-                            produced: placeholder,
-                            button_name: "rm -rf",
-                            debug_message: "running rm -rf...",
-                            description: "Wipe out all loc and bugs",
-                            loc_base_cost: Decimal::ZERO,
-                            loc_growth_rate: Decimal::ONE,
-                        }
-                    }
                 }
                 div { // vertical
                     class: "researches",
-                    if !researched().contains("internship") {
-                        ResearchOnce{
-                            logs: logs,
-                            researched: researched,
-                            loc: loc,
-                            research_name: "internship",
-                            button_name: "research internship",
-                            debug_message: "intership researched",
-                            description: "Allow hiring interns, who produce loc and bugs automaticaly.",
-                            loc_cost: constants.research_internship_loc_cost,
-                        }
+                    ResearchOnce{
+                        logs: logs,
+                        researched: researched,
+                        loc: loc,
+                        research_name: "internship",
+                        button_name: "research internship",
+                        debug_message: "intership researched",
+                        description: "Allow hiring interns, who produce loc and bugs automaticaly.",
+                        loc_cost: constants.research_internship_loc_cost,
                     }
-                    if !researched().contains("code_metrics") {
-                        ResearchOnce{
-                            logs: logs,
-                            researched: researched,
-                            loc: loc,
-                            research_name: "code_metrics",
-                            button_name: "research code metrics",
-                            debug_message: "code metrics researched",
-                            description: "Display LOC/s and bugs/s.",
-                            loc_cost: constants.research_code_metrics_loc_cost,
-                        }
+                    ResearchOnce{
+                        logs: logs,
+                        researched: researched,
+                        loc: loc,
+                        research_name: "code_metrics",
+                        button_name: "research code metrics",
+                        debug_message: "code metrics researched",
+                        description: "Display LOC/s and bugs/s.",
+                        loc_cost: constants.research_code_metrics_loc_cost,
                     }
-                    if !researched().contains("rmrf") {
-                        ResearchOnce{
-                            logs: logs,
-                            researched: researched,
-                            loc: loc,
-                            research_name: "rmrf",
-                            button_name: "learn rm -rf",
-                            debug_message: "rm -rf researched",
-                            description: "For desperate situations, allow using rm-rf command",
-                            loc_cost: constants.research_rmrf_loc_cost,
-                        }
+                    ResearchOnce{
+                        logs: logs,
+                        researched: researched,
+                        loc: loc,
+                        research_name: "rmrf",
+                        button_name: "learn rm -rf",
+                        debug_message: "rm -rf researched",
+                        description: "For desperate situations, allow using rm-rf command",
+                        loc_cost: constants.research_rmrf_loc_cost,
                     }
-                    if !researched().contains("interns_promotion") {
-                        ResearchOnce{
-                            logs: logs,
-                            researched: researched,
-                            loc: loc,
-                            research_name: "interns_promotion",
-                            button_name: "promote interns",
-                            debug_message: "interns promotion researched",
-                            description: "Allow interns to be promoted to junior devs",
-                            loc_cost: constants.research_interns_promotion_loc_cost,
-                        }
+                    ResearchOnce{
+                        logs: logs,
+                        researched: researched,
+                        loc: loc,
+                        require: Some("internship".to_string()),
+                        research_name: "interns_promotion",
+                        button_name: "promote interns",
+                        debug_message: "interns promotion researched",
+                        description: "Allow interns to be promoted to junior devs",
+                        loc_cost: constants.research_interns_promotion_loc_cost,
                     }
-                    if !researched().contains("junior_devs_promotion") {
-                        ResearchOnce{
-                            logs: logs,
-                            researched: researched,
-                            loc: loc,
-                            research_name: "junior_devs_promotion",
-                            button_name: "promote junior devs",
-                            debug_message: "junior devs promotion researched",
-                            description: "Allow junior devs to be promoted to senior devs",
-                            loc_cost: constants.research_junior_devs_promotion_loc_cost,
-                        }
+                    ResearchOnce{
+                        logs: logs,
+                        researched: researched,
+                        loc: loc,
+                        require: Some("interns_promotion".to_string()),
+                        research_name: "junior_devs_promotion",
+                        button_name: "promote junior devs",
+                        debug_message: "junior devs promotion researched",
+                        description: "Allow junior devs to be promoted to senior devs",
+                        loc_cost: constants.research_junior_devs_promotion_loc_cost,
                     }
-                    if !researched().contains("toggle_theme") {
-                        ResearchOnce{
-                            logs: logs,
-                            researched: researched,
-                            loc: loc,
-                            research_name: "toggle_theme",
-                            button_name: "install theme",
-                            debug_message: "toggle theme researched",
-                            description: "Allow toggling theme",
-                            loc_cost: constants.research_toggle_theme_loc_cost,
-                        }
+                    ResearchOnce{
+                        logs: logs,
+                        researched: researched,
+                        loc: loc,
+                        research_name: "toggle_theme",
+                        button_name: "install theme",
+                        debug_message: "toggle theme researched",
+                        description: "Allow toggling theme",
+                        loc_cost: constants.research_toggle_theme_loc_cost,
                     }
                 }
             }
