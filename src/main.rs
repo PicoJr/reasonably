@@ -344,6 +344,7 @@ fn Home() -> Element {
                     loc: loc,
                     speedrun_start: speedrun_start,
                     current_time: current_time,
+                    max_loc: constants.max_loc,
                 }
                 Metrics {
                     researched: researched,

@@ -14,7 +14,9 @@ pub(crate) fn Speedrun(
     loc: Signal<Decimal>,
     speedrun_start: Signal<Option<Instant>>,
     current_time: Signal<Instant>,
+    max_loc: Decimal,
 ) -> Element {
+    let progress = (loc().max(&Decimal::ONE).log10() / max_loc.max(&Decimal::ONE).log10()).clamp(0.0, 1.0);
     let elapsed_time = if let Some(start) = speedrun_start() {
         let duration = current_time() - start;
         let millis = duration.as_millis();
@@ -45,8 +47,8 @@ pub(crate) fn Speedrun(
                     tr {
                         td {
                             progress {
-                                value: 20.0,
-                                max: 100.0,
+                                value: {progress},
+                                max: 1.0,
                             }
                         }
                         td {
