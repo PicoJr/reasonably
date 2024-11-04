@@ -20,6 +20,7 @@ use research_once::ResearchOnce;
 use format_decimal::{format_decimal_devs, format_decimal_bugs, format_decimal_loc};
 
 use std::collections::{HashSet};
+use web_time::{Instant};
 
 use break_infinity::{sum_geometric_series, Decimal};
 use dioxus::prelude::*;
@@ -72,6 +73,8 @@ fn Home() -> Element {
         }
     );
     let theme: Signal<Theme> = use_signal(|| Theme::LightTheme);
+    let speedrun_start: Signal<Option<Instant>> = use_signal(|| None);
+    let mut current_time: Signal<Instant> = use_signal(|| Instant::now());
 
     // stats
     let mut loc_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
@@ -221,6 +224,9 @@ fn Home() -> Element {
             *senior_devs_clicks.write() = Decimal::ZERO;
             *rmrf_clicks.write() = Decimal::ZERO;
 
+            // update current time
+            *current_time.write() = Instant::now();
+
             // sleep before next tick
             sleep(std::time::Duration::from_millis(dt_milliseconds)).await;
         }
@@ -336,6 +342,8 @@ fn Home() -> Element {
                 Speedrun {
                     researched: researched,
                     loc: loc,
+                    speedrun_start: speedrun_start,
+                    current_time: current_time,
                 }
                 Metrics {
                     researched: researched,
@@ -361,6 +369,7 @@ fn Home() -> Element {
                     CodeAction{
                         logs,
                         code_clicks,
+                        speedrun_start: speedrun_start,
                     }
                     if bugs() > Decimal::ZERO {
                         DebugAction {

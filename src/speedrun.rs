@@ -1,18 +1,31 @@
 #![allow(non_snake_case)]
 use std::collections::HashSet;
+use web_time::{Instant};
+
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
-use crate::simple_logs::SimpleLogs;
-use crate::format_decimal::{format_decimal_loc, format_decimal_bugs};
 
 #[component]
 pub(crate) fn Speedrun(
     researched: Signal<HashSet<String>>,
     loc: Signal<Decimal>,
+    speedrun_start: Signal<Option<Instant>>,
+    current_time: Signal<Instant>,
 ) -> Element {
+    let elapsed_time = if let Some(start) = speedrun_start() {
+        let duration = current_time() - start;
+        let millis = duration.as_millis();
+        let hundredth = (millis / 10u128) % 100u128;
+        let seconds = (millis / 1000u128) % 60u128;
+        let minutes = (millis / 60_000u128) % 60u128;
+        let hours = millis / 3600_000u128;
+        format!("{}:{}:{}.{}", hours, minutes, seconds, hundredth)
+    }  else {
+        "timer not started".to_string()
+    };
     rsx! {
         if researched().contains("speedrun") {
             div {
@@ -38,7 +51,7 @@ pub(crate) fn Speedrun(
                         }
                         td {
                             class: "table-value",
-                            "{format_decimal_loc(loc())}"
+                            "{elapsed_time}"
                         }
                     }
                 }
