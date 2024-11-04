@@ -9,49 +9,36 @@ use crate::simple_logs::SimpleLogs;
 use crate::format_decimal::{format_decimal_loc, format_decimal_bugs};
 
 #[component]
-pub(crate) fn Metrics(
+pub(crate) fn Speedrun(
     researched: Signal<HashSet<String>>,
-    loc_dt: Signal<Decimal>,
-    bugs_dt: Signal<Decimal>,
-    dt: Signal<Decimal>,
+    loc: Signal<Decimal>,
 ) -> Element {
     rsx! {
-        if researched().contains("code_metrics") {
+        if researched().contains("speedrun") {
             div {
-                class: "metrics",
+                class: "speedrun",
                 table {
-                    class: "metrics-table",
+                    class: "speedrun-table",
                     tr {
                         th {
                             class: "table-name",
-                            "metrics"
+                            "progress"
                         }
                         th {
                             class: "table-value",
-                            "value"
+                            "time"
                         }
                     }
                     tr {
-                        td {"LOC/s"}
                         td {
-                            class: "table-value",
-                            "{format_decimal_loc(loc_dt())}"
-                        }
-                    }
-                    tr {
-                        td {"bugs/s"}
-                        td {
-                            class: "table-value",
-                            "{format_decimal_bugs(bugs_dt())}"
-                        }
-                    }
-                    if researched().contains("cheating") {
-                        tr {
-                            td {"dt"}
-                            td {
-                                class: "table-value",
-                                "{dt()}"
+                            progress {
+                                value: 20.0,
+                                max: 100.0,
                             }
+                        }
+                        td {
+                            class: "table-value",
+                            "{format_decimal_loc(loc())}"
                         }
                     }
                 }

@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 use std::collections::HashSet;
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};

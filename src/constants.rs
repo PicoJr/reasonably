@@ -15,6 +15,7 @@ pub(crate) struct GameConstants {
     pub research_interns_promotion_loc_cost: Decimal,
     pub research_junior_devs_promotion_loc_cost: Decimal,
     pub research_code_metrics_loc_cost: Decimal,
+    pub research_speedrun_loc_cost: Decimal,
     pub research_rmrf_loc_cost: Decimal,
     pub research_toggle_theme_loc_cost: Decimal,
     // initial promotion ratio
@@ -48,6 +49,7 @@ impl Default for GameConstants {
             research_interns_promotion_loc_cost: Decimal::new(1.0),
             research_junior_devs_promotion_loc_cost: Decimal::new(1.0),
             research_code_metrics_loc_cost: Decimal::new(1.0),
+            research_speedrun_loc_cost: Decimal::new(1.0),
             research_rmrf_loc_cost: Decimal::new(1.0),
             research_toggle_theme_loc_cost: Decimal::new(1.0),
             interns_promotion_ratio_dt: Decimal::new(0.04),

@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;

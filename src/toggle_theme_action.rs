@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 use std::collections::HashSet;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
@@ -12,15 +13,10 @@ pub(crate) fn ToggleThemeAction(
     mut logs: Signal<SimpleLogs>,
     mut researched: Signal<HashSet<String>>,
     mut theme: Signal<Theme>,
-    require: Option<String>,
 ) -> Element {
     let current_theme: Theme = theme();
-    let requirements_met = require.map_or_else(
-        || true,
-        |research_name_required| researched().contains(research_name_required.as_str())
-    );
     rsx! {
-        if requirements_met {
+        if researched().contains("toggle_theme") {
             button {
                 class: "repeatable-action-button",
                 onclick: move |_| {

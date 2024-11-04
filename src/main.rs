@@ -11,6 +11,7 @@ mod constants;
 mod cheat_action;
 mod metrics;
 mod resources;
+mod speedrun;
 
 use simple_logs::{SimpleLogs, Logs};
 use repeatable_action::RepeatableAction;
@@ -31,6 +32,7 @@ use crate::constants::GameConstants;
 use crate::debug_action::DebugAction;
 use crate::metrics::Metrics;
 use crate::resources::Resources;
+use crate::speedrun::Speedrun;
 
 #[derive(Clone, Debug, PartialEq)]
 enum Theme {
@@ -245,7 +247,7 @@ fn Home() -> Element {
                 research_name: "internship",
                 button_name: "research internship",
                 debug_message: "intership researched",
-                description: "Allow hiring interns, who produce loc and bugs automaticaly.",
+                description: "Allow hiring interns, who produce loc and bugs automatically.",
                 loc_cost: constants.research_internship_loc_cost,
             }
         },
@@ -259,6 +261,18 @@ fn Home() -> Element {
                 debug_message: "code metrics researched",
                 description: "Display LOC/s and bugs/s.",
                 loc_cost: constants.research_code_metrics_loc_cost,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                research_name: "speedrun",
+                button_name: "research speedrun",
+                debug_message: "speedrun researched",
+                description: "Display progress and real time timer",
+                loc_cost: constants.research_speedrun_loc_cost,
             }
         },
         rsx! {
@@ -319,13 +333,15 @@ fn Home() -> Element {
             Logs {logs}
             div { // vertical
                 class: "metrics",
-                if researched().contains("code_metrics") {
-                    Metrics {
-                        researched: researched,
-                        loc_dt: loc_dt,
-                        bugs_dt: bugs_dt,
-                        dt: dt,
-                    }
+                Speedrun {
+                    researched: researched,
+                    loc: loc,
+                }
+                Metrics {
+                    researched: researched,
+                    loc_dt: loc_dt,
+                    bugs_dt: bugs_dt,
+                    dt: dt,
                 }
                 if loc() > Decimal::ZERO {
                     Resources {
@@ -356,7 +372,6 @@ fn Home() -> Element {
                         logs: logs,
                         researched: researched,
                         theme: theme,
-                        require: Some("toggle_theme".to_string()),
                     }
                     RepeatableAction{
                         logs: logs,
