@@ -12,6 +12,8 @@ pub(crate) struct GameConstants {
     pub senior_devs_loc_growth_rate: Decimal,
     // research once costs
     pub research_internship_loc_cost: Decimal,
+    pub research_junior_devs_position_loc_cost: Decimal,
+    pub research_senior_devs_position_loc_cost: Decimal,
     pub research_interns_promotion_loc_cost: Decimal,
     pub research_junior_devs_promotion_loc_cost: Decimal,
     pub research_code_metrics_loc_cost: Decimal,
@@ -39,6 +41,7 @@ pub(crate) struct GameConstants {
     pub max_loc: Decimal,
     // quests
     pub quest_hello_world_loc_cost: Decimal,
+    pub quest_fizz_buzz_loc_cost: Decimal,
 }
 
 impl Default for GameConstants {
@@ -51,6 +54,8 @@ impl Default for GameConstants {
             senior_devs_loc_base_cost: Decimal::new(40.0),
             senior_devs_loc_growth_rate: Decimal::new(1.1),
             research_internship_loc_cost: Decimal::new(1.0),
+            research_junior_devs_position_loc_cost: Decimal::new(1.0),
+            research_senior_devs_position_loc_cost: Decimal::new(1.0),
             research_interns_promotion_loc_cost: Decimal::new(1.0),
             research_junior_devs_promotion_loc_cost: Decimal::new(1.0),
             research_code_metrics_loc_cost: Decimal::new(1.0),
@@ -72,6 +77,7 @@ impl Default for GameConstants {
             senior_devs_bugs_ratio: Decimal::new(1.0),
             max_loc: Decimal::new(1e21),
             quest_hello_world_loc_cost: Decimal::new(1.0),
+            quest_fizz_buzz_loc_cost: Decimal::new(10.0),
         }
     }
 }

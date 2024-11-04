@@ -252,9 +252,37 @@ fn Home() -> Element {
                 loc: loc,
                 research_name: "internship",
                 button_name: "research internship",
-                debug_message: "intership researched",
+                debug_message: "internship researched",
                 description: "Allow hiring interns, who produce loc and bugs automatically.",
                 loc_cost: constants.research_internship_loc_cost,
+                quest: false,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                require: Some("internship".to_string()),
+                research_name: "junior_devs_position",
+                button_name: "research junior devs",
+                debug_message: "junior devs researched",
+                description: "Allow hiring junior devs, who produce loc and bugs automatically.",
+                loc_cost: constants.research_junior_devs_position_loc_cost,
+                quest: false,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                require: Some("junior_devs_position".to_string()),
+                research_name: "senior_devs_position",
+                button_name: "research senior devs",
+                debug_message: "senior devs researched",
+                description: "Allow hiring senior devs, who produce loc and bugs automatically.",
+                loc_cost: constants.research_senior_devs_position_loc_cost,
                 quest: false,
             }
         },
@@ -364,6 +392,20 @@ fn Home() -> Element {
                 quest: true,
             }
         },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                require: Some("hello_world".to_string()),
+                research_name: "fizz_buzz",
+                button_name: "code fizz buzz",
+                debug_message: "code fizz buzz",
+                description: "Your 2nd program",
+                loc_cost: constants.quest_fizz_buzz_loc_cost,
+                quest: true,
+            }
+        },
     ].into_iter();
 
     rsx! {
@@ -437,7 +479,7 @@ fn Home() -> Element {
                         researched: researched,
                         clicks: junior_devs_clicks,
                         loc: loc,
-                        require: Some("junior_position".to_string()),
+                        require: Some("junior_devs_position".to_string()),
                         produced: junior_devs,
                         button_name: "hire junior dev",
                         debug_message: "hiring a junior dev...",
@@ -450,7 +492,7 @@ fn Home() -> Element {
                         researched: researched,
                         clicks: senior_devs_clicks,
                         loc: loc,
-                        require: Some("senior_position".to_string()),
+                        require: Some("senior_devs_position".to_string()),
                         produced: senior_devs,
                         button_name: "hire senior dev",
                         debug_message: "hiring a senior dev...",
