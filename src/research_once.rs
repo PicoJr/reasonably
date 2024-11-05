@@ -15,6 +15,7 @@ pub(crate) fn ResearchOnce(
     mut researched: Signal<HashSet<String>>,
     mut loc: Signal<Decimal>,
     research_name: String,
+    research_alias: Option<String>, // also insert this alias in `researched`
     require: Option<String>,
     button_name: String,
     debug_message: String,
@@ -44,7 +45,10 @@ pub(crate) fn ResearchOnce(
                     class: css_button_class,
                     disabled: disabled,
                     onclick: move |_| {
-                    researched.write().insert(research_name.clone()) ;
+                    researched.write().insert(research_name.clone());
+                    if let Some(alias) = &research_alias {
+                        researched.write().insert(alias.clone());
+                    }
                     logs.write().log(
                         &debug_message
                     );

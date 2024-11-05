@@ -21,6 +21,7 @@ pub(crate) struct GameConstants {
     pub research_logs_loc_cost: Decimal,
     pub research_rmrf_loc_cost: Decimal,
     pub research_toggle_theme_loc_cost: Decimal,
+    pub research_syntax_coloring_multiplier_loc_cost: Decimal,
     // initial promotion ratio
     pub interns_promotion_ratio_dt: Decimal,
     pub junior_devs_promotion_ratio_dt: Decimal,
@@ -55,6 +56,8 @@ pub(crate) struct GameConstants {
     pub quest_solar_system_loc_cost: Decimal,
     pub quest_universe_loc_cost: Decimal,
     pub quest_differentiation_loc_cost: Decimal,
+    // multipliers
+    pub research_syntax_coloring_multiplier: Decimal,
 }
 
 impl Default for GameConstants {
@@ -76,6 +79,7 @@ impl Default for GameConstants {
             research_logs_loc_cost: Decimal::new(1.0),
             research_rmrf_loc_cost: Decimal::new(1.0),
             research_toggle_theme_loc_cost: Decimal::new(1.0),
+            research_syntax_coloring_multiplier_loc_cost: Decimal::new(1.0),
             interns_promotion_ratio_dt: Decimal::new(0.04),
             junior_devs_promotion_ratio_dt: Decimal::new(0.02),
             senior_devs_retirement_ratio_dt: Decimal::new(0.01),
@@ -105,6 +109,7 @@ impl Default for GameConstants {
             quest_solar_system_loc_cost: Decimal::new(1e15),
             quest_universe_loc_cost: Decimal::new(1e18),
             quest_differentiation_loc_cost: Decimal::new(1e21),
+            research_syntax_coloring_multiplier: Decimal::new(2.0),
         }
     }
 }

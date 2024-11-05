@@ -64,7 +64,7 @@ fn Home() -> Element {
     let constants = GameConstants::default();
 
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
-    let researched: Signal<HashSet<String>> = use_signal(
+    let mut researched: Signal<HashSet<String>> = use_signal(
         || {
             let mut researches = HashSet::new();
             researches.insert("cheating".to_string());
@@ -103,7 +103,7 @@ fn Home() -> Element {
 
     // producers
     let mut interns: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let interns_loc_dt: Signal<Decimal> = use_signal(|| constants.interns_loc_dt);
+    let mut interns_loc_dt: Signal<Decimal> = use_signal(|| constants.interns_loc_dt);
     let mut junior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let junior_devs_loc_dt: Signal<Decimal> = use_signal(|| constants.junior_devs_loc_dt);
     let mut senior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
@@ -163,13 +163,19 @@ fn Home() -> Element {
                 &senior_devs(),
             );
 
-            // loc produced by interns, ...
+            // multipliers
+            if researched().contains("syntax_coloring_multiplier_alias") {
+                *interns_loc_dt.write() *= constants.research_syntax_coloring_multiplier;
+                researched.write().remove("syntax_coloring_multiplier_alias");
+            }
+
+            // loc produced by devs
             let auto_loc = (
                 interns() * interns_loc_dt()
                     + junior_devs() * junior_devs_loc_dt()
                     + senior_devs() * senior_devs_loc_dt()
             ) * dt();
-            // bugs produced by interns, ...
+            // bugs produced by devs
             let auto_bugs = (
                 interns() * interns_loc_dt() * interns_bugs_ratio()
                     + junior_devs() * junior_devs_loc_dt() * junior_devs_bugs_ratio()
@@ -376,6 +382,20 @@ fn Home() -> Element {
                 debug_message: "toggle theme researched",
                 description: "Allow toggling theme",
                 loc_cost: constants.research_toggle_theme_loc_cost,
+                quest: false,
+            }
+        },
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                research_name: "syntax_coloring_multiplier",
+                research_alias: Some("syntax_coloring_multiplier_alias".to_string()),
+                button_name: "install syntax coloring",
+                debug_message: "install syntax coloring",
+                description: "Boost interns loc/s x{constants.research_syntax_coloring_multiplier}",
+                loc_cost: constants.research_syntax_coloring_multiplier_loc_cost,
                 quest: false,
             }
         },
