@@ -37,8 +37,6 @@ pub(crate) struct GameConstants {
     pub interns_bugs_ratio: Decimal,
     pub junior_devs_bugs_ratio: Decimal,
     pub senior_devs_bugs_ratio: Decimal,
-    // max loc for progress tracking
-    pub max_loc: Decimal,
     // quests
     pub quest_hello_world_loc_cost: Decimal,
     pub quest_fizz_buzz_loc_cost: Decimal,
@@ -90,7 +88,6 @@ impl Default for GameConstants {
             interns_bugs_ratio: Decimal::new(2.0),
             junior_devs_bugs_ratio: Decimal::new(1.5),
             senior_devs_bugs_ratio: Decimal::new(1.0),
-            max_loc: Decimal::new(1e21),
             quest_hello_world_loc_cost: Decimal::new(1.0),
             quest_fizz_buzz_loc_cost: Decimal::new(10.0),
             quest_calculator_loc_cost: Decimal::new(100.0),

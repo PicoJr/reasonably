@@ -385,6 +385,21 @@ fn Home() -> Element {
     let quests_rendered = vec![
         ("hello_world", "code hello world", "Your 1st program",  None, constants.quest_hello_world_loc_cost),
         ("fizz_buzz", "code Fizzbuzz", "Your 2nd program",  Some("hello_world".to_string()), constants.quest_fizz_buzz_loc_cost),
+        ("calculator", "code calculator", "Your 3rd program",  Some("fizz_buzz".to_string()), constants.quest_calculator_loc_cost),
+        ("game_of_life", "code game of life", "?",  Some("calculator".to_string()), constants.quest_game_of_life_loc_cost),
+        ("text_editor", "code a text editor", "?",  Some("game_of_life".to_string()), constants.quest_text_editor_loc_cost),
+        ("physics_engine", "code a physics engine", "?",  Some("text_editor".to_string()), constants.quest_physics_engine_loc_cost),
+        ("bacteria", "simulate a bacteria", "?",  Some("physics_engine".to_string()), constants.quest_bacteria_loc_cost),
+        ("browser", "code a browser", "?",  Some("bacteria".to_string()), constants.quest_browser_loc_cost),
+        ("kernel", "code a kernel", "?",  Some("browser".to_string()), constants.quest_kernel_loc_cost),
+        ("mouse", "simulate a mouse", "?",  Some("kernel".to_string()), constants.quest_mouse_loc_cost),
+        ("human_brain", "simulate a human brain", "?",  Some("mouse".to_string()), constants.quest_human_brain_loc_cost),
+        ("economy", "simulate the economy", "?",  Some("human_brain".to_string()), constants.quest_economy_loc_cost),
+        ("climate", "simulate the climate", "?",  Some("economy".to_string()), constants.quest_climate_loc_cost),
+        ("earth", "simulate the Earth", "?",  Some("climate".to_string()), constants.quest_earth_loc_cost),
+        ("solar_system", "simulate the solar system", "?",  Some("earth".to_string()), constants.quest_solar_system_loc_cost),
+        ("universe", "simulate the universe", "?",  Some("solar_system".to_string()), constants.quest_universe_loc_cost),
+        ("differentiation", "differentiate the simulation", "?",  Some("universe".to_string()), constants.quest_differentiation_loc_cost),
     ].into_iter().map(|(name, button_name, description, require, loc_cost)|
         rsx! {
             ResearchOnce{
@@ -417,7 +432,7 @@ fn Home() -> Element {
                     loc: loc,
                     speedrun_start: speedrun_start,
                     current_time: current_time,
-                    max_loc: constants.max_loc,
+                    max_loc: constants.quest_differentiation_loc_cost,
                 }
                 Metrics {
                     researched: researched,

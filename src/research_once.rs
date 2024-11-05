@@ -7,6 +7,7 @@ use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
 
 use crate::simple_logs::SimpleLogs;
+use crate::format_decimal::format_decimal_loc;
 
 #[component]
 pub(crate) fn ResearchOnce(
@@ -38,7 +39,7 @@ pub(crate) fn ResearchOnce(
             div {
                 class: css_class,
                 p {"{description}"}
-                p {"Cost {loc_cost} loc"}
+                p {"Cost {format_decimal_loc(loc_cost)}"}
                 button {
                     class: css_button_class,
                     disabled: disabled,
