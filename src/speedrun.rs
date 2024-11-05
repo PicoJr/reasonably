@@ -23,7 +23,7 @@ pub(crate) fn Speedrun(
         let hundredth = (millis / 10u128) % 100u128;
         let seconds = (millis / 1000u128) % 60u128;
         let minutes = (millis / 60_000u128) % 60u128;
-        let hours = millis / 3600_000u128;
+        let hours = millis / 3_600_000u128;
         format!("{}:{:02}:{:02}.{:02}", hours, minutes, seconds, hundredth)
     }  else {
         "timer not started".to_string()

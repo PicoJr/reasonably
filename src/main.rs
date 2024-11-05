@@ -73,7 +73,7 @@ fn Home() -> Element {
     );
     let theme: Signal<Theme> = use_signal(|| Theme::LightTheme);
     let speedrun_start: Signal<Option<Instant>> = use_signal(|| None);
-    let mut current_time: Signal<Instant> = use_signal(|| Instant::now());
+    let mut current_time: Signal<Instant> = use_signal(Instant::now);
 
     // stats
     let mut loc_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
@@ -435,8 +435,7 @@ fn Home() -> Element {
                 quest: true,
             }
         }
-    )
-    .into_iter();
+    );
 
     rsx! {
         div { // vertical
