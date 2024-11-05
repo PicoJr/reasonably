@@ -19,3 +19,6 @@ DD.md
 
 # br files
 *.br
+
+# virtual env
+/venv

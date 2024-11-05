@@ -42,6 +42,21 @@ pub(crate) struct GameConstants {
     // quests
     pub quest_hello_world_loc_cost: Decimal,
     pub quest_fizz_buzz_loc_cost: Decimal,
+    pub quest_calculator_loc_cost: Decimal,
+    pub quest_game_of_life_loc_cost: Decimal,
+    pub quest_text_editor_loc_cost: Decimal,
+    pub quest_physics_engine_loc_cost: Decimal,
+    pub quest_bacteria_loc_cost: Decimal,
+    pub quest_browser_loc_cost: Decimal,
+    pub quest_kernel_loc_cost: Decimal,
+    pub quest_mouse_loc_cost: Decimal,
+    pub quest_human_brain_loc_cost: Decimal,
+    pub quest_economy_loc_cost: Decimal,
+    pub quest_climate_loc_cost: Decimal,
+    pub quest_earth_loc_cost: Decimal,
+    pub quest_solar_system_loc_cost: Decimal,
+    pub quest_universe_loc_cost: Decimal,
+    pub quest_differentiation_loc_cost: Decimal,
 }
 
 impl Default for GameConstants {
@@ -78,6 +93,21 @@ impl Default for GameConstants {
             max_loc: Decimal::new(1e21),
             quest_hello_world_loc_cost: Decimal::new(1.0),
             quest_fizz_buzz_loc_cost: Decimal::new(10.0),
+            quest_calculator_loc_cost: Decimal::new(100.0),
+            quest_game_of_life_loc_cost: Decimal::new(1e3),
+            quest_text_editor_loc_cost: Decimal::new(1e4),
+            quest_physics_engine_loc_cost: Decimal::new(1e5),
+            quest_bacteria_loc_cost: Decimal::new(1e6),
+            quest_browser_loc_cost: Decimal::new(5e6),
+            quest_kernel_loc_cost: Decimal::new(30e6),
+            quest_mouse_loc_cost: Decimal::new(100e6),
+            quest_human_brain_loc_cost: Decimal::new(1e9),
+            quest_economy_loc_cost: Decimal::new(10e9),
+            quest_climate_loc_cost: Decimal::new(100e9),
+            quest_earth_loc_cost: Decimal::new(1e12),
+            quest_solar_system_loc_cost: Decimal::new(1e15),
+            quest_universe_loc_cost: Decimal::new(1e18),
+            quest_differentiation_loc_cost: Decimal::new(1e21),
         }
     }
 }

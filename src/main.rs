@@ -379,34 +379,29 @@ fn Home() -> Element {
                 quest: false,
             }
         },
-        rsx! {
-            ResearchOnce{
-                logs: logs,
-                researched: researched,
-                loc: loc,
-                research_name: "hello_world",
-                button_name: "code hello world",
-                debug_message: "code hello world",
-                description: "Your first program",
-                loc_cost: constants.quest_hello_world_loc_cost,
-                quest: true,
-            }
-        },
-        rsx! {
-            ResearchOnce{
-                logs: logs,
-                researched: researched,
-                loc: loc,
-                require: Some("hello_world".to_string()),
-                research_name: "fizz_buzz",
-                button_name: "code fizz buzz",
-                debug_message: "code fizz buzz",
-                description: "Your 2nd program",
-                loc_cost: constants.quest_fizz_buzz_loc_cost,
-                quest: true,
-            }
-        },
     ].into_iter();
+
+
+    let quests_rendered = vec![
+        ("hello_world", "code hello world", "Your 1st program",  None, constants.quest_hello_world_loc_cost),
+        ("fizz_buzz", "code Fizzbuzz", "Your 2nd program",  Some("hello_world".to_string()), constants.quest_fizz_buzz_loc_cost),
+    ].into_iter().map(|(name, button_name, description, require, loc_cost)|
+        rsx! {
+            ResearchOnce{
+                logs: logs,
+                researched: researched,
+                loc: loc,
+                require: require,
+                research_name: name,
+                button_name: button_name,
+                debug_message: button_name,
+                description: description,
+                loc_cost: loc_cost,
+                quest: true,
+            }
+        }
+    )
+    .into_iter();
 
     rsx! {
         div { // vertical
@@ -559,6 +554,10 @@ fn Home() -> Element {
                 div { // vertical
                     class: "researches",
                     {research_rendered}
+                }
+                div { // vertical
+                    class: "quests",
+                    {quests_rendered}
                 }
             }
         }
