@@ -303,6 +303,29 @@ fn Home() -> Element {
         }
     );
 
+    let repeatable_actions_rendered = vec![
+        ("hire intern", "Produces loc, and bugs", interns_clicks, interns, constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some("internship".to_string())),
+        ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, junior_devs, constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some("junior_devs_position".to_string())),
+        ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, senior_devs, constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some("senior_devs_position".to_string())),
+        ("rm -rf", "Wipe out all loc and bugs", rmrf_clicks, placeholder, Decimal::ZERO, Decimal::ONE, Some("rmrf".to_string())),
+    ].into_iter().map(|(button_name, description, clicks, produced, loc_base_cost, loc_growth_rate, require)|
+        rsx! {
+            RepeatableAction{
+                logs: logs,
+                researched: researched,
+                clicks: clicks,
+                loc: loc,
+                require: require,
+                produced: produced,
+                button_name: button_name,
+                debug_message: button_name,
+                description: description,
+                loc_base_cost: loc_base_cost,
+                loc_growth_rate: loc_growth_rate,
+            }
+        }
+    );
+
     rsx! {
         div { // vertical
             class: "everything",
@@ -356,58 +379,7 @@ fn Home() -> Element {
                         researched: researched,
                         theme: theme,
                     }
-                    RepeatableAction{
-                        logs: logs,
-                        researched: researched,
-                        clicks: interns_clicks,
-                        loc: loc,
-                        require: Some("internship".to_string()),
-                        produced: interns,
-                        button_name: "hire intern",
-                        debug_message: "hiring an intern...",
-                        description: "Produces loc, and bugs",
-                        loc_base_cost: constants.interns_loc_base_cost,
-                        loc_growth_rate: constants.interns_loc_growth_rate,
-                    }
-                    RepeatableAction{
-                        logs: logs,
-                        researched: researched,
-                        clicks: junior_devs_clicks,
-                        loc: loc,
-                        require: Some("junior_devs_position".to_string()),
-                        produced: junior_devs,
-                        button_name: "hire junior dev",
-                        debug_message: "hiring a junior dev...",
-                        description: "Produces loc, and bugs",
-                        loc_base_cost: constants.junior_devs_loc_base_cost,
-                        loc_growth_rate: constants.junior_devs_loc_growth_rate,
-                    }
-                    RepeatableAction{
-                        logs: logs,
-                        researched: researched,
-                        clicks: senior_devs_clicks,
-                        loc: loc,
-                        require: Some("senior_devs_position".to_string()),
-                        produced: senior_devs,
-                        button_name: "hire senior dev",
-                        debug_message: "hiring a senior dev...",
-                        description: "Produces loc, and bugs",
-                        loc_base_cost: constants.senior_devs_loc_base_cost,
-                        loc_growth_rate: constants.senior_devs_loc_growth_rate,
-                    }
-                    RepeatableAction{
-                        logs: logs,
-                        researched: researched,
-                        clicks: rmrf_clicks,
-                        loc: loc,
-                        require: Some("rmrf".to_string()),
-                        produced: placeholder,
-                        button_name: "rm -rf",
-                        debug_message: "running rm -rf...",
-                        description: "Wipe out all loc and bugs",
-                        loc_base_cost: Decimal::ZERO,
-                        loc_growth_rate: Decimal::ONE,
-                    }
+                    {repeatable_actions_rendered}
                     if researched().contains("cheating") {
                         CheatAction{
                             logs: logs,
