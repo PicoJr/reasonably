@@ -249,7 +249,7 @@ fn Home() -> Element {
         ("interns_promotion", "promote interns", "Allow interns to be promoted to junior devs", constants.research_interns_promotion_loc_cost, Some("internship".to_string()), None),
         ("junior_devs_promotion", "promote junior devs", "Allow junior devs to be promoted to senior devs", constants.research_junior_devs_promotion_loc_cost, Some("interns_promotion".to_string()), None),
         ("toggle_theme", "install theme", "Allow toggling theme", constants.research_toggle_theme_loc_cost, None, None),
-        ("syntax_coloring_multiplier", "install syntax coloring", "Boost interns loc/s x{constants.research_syntax_coloring_multiplier}", constants.research_syntax_coloring_multiplier_loc_cost, None, Some("syntax_coloring_multiplier_alias".to_string())),
+        ("syntax_coloring_multiplier", "install syntax coloring", "Boost interns loc/s x2", constants.research_syntax_coloring_multiplier_loc_cost, None, Some("syntax_coloring_multiplier_alias".to_string())),
     ].into_iter().map(|(research_name, button_name, description, loc_cost, require, alias)|
          rsx! {
             ResearchOnce{
