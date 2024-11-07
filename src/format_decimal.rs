@@ -26,6 +26,11 @@ pub(crate) fn format_decimal_bugs(decimal: Decimal) -> String {
     format_decimal(decimal, "bugs")
 }
 
+
+pub(crate) fn format_decimal_hrs(decimal: Decimal) -> String {
+    format_decimal(decimal, "hrs")
+}
+
 pub(crate) fn format_decimal_loc(decimal: Decimal) -> String {
     // Linux Kernel 5.11 approximately has 30 millions lines of code cf https://en.wikipedia.org/wiki/Linux_kernel
     let linux_kernel_loc: Decimal = Decimal::new(30e6);

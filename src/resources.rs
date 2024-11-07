@@ -4,7 +4,7 @@ use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal};
 use dioxus::prelude::*;
-use crate::format_decimal::{format_decimal_loc, format_decimal_bugs, format_decimal_devs};
+use crate::format_decimal::{format_decimal_loc, format_decimal_bugs, format_decimal_devs, format_decimal_hrs};
 
 #[component]
 pub(crate) fn Resources(
@@ -14,6 +14,7 @@ pub(crate) fn Resources(
     junior_devs: Signal<Decimal>,
     senior_devs: Signal<Decimal>,
     retired_devs: Signal<Decimal>,
+    hrs: Signal<Decimal>,
 ) -> Element {
     rsx! {
         div {
@@ -81,6 +82,15 @@ pub(crate) fn Resources(
                         td{
                             class: "table-value",
                             "{format_decimal_devs(retired_devs())}"
+                        }
+                    }
+                }
+                if hrs() > Decimal::ZERO {
+                    tr {
+                        td{"HRs"}
+                        td{
+                            class: "table-value",
+                            "{format_decimal_hrs(hrs())}"
                         }
                     }
                 }
