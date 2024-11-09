@@ -103,6 +103,13 @@ fn Home() -> Element {
     let mut bugs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // producers
+    // <interns/junior/senior> recruited manually by clicking the hire <interns/junior/senior> button
+    // tracked separately in order to keep cost independent of <interns/junior/senior> recruited automatically
+    let mut manual_interns: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut manual_junior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut manual_senior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut manual_hrs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+
     let mut interns: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut interns_loc_dt: Signal<Decimal> = use_signal(|| constants.interns_loc_dt);
     let mut junior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
@@ -139,13 +146,13 @@ fn Home() -> Element {
             // loc produced by clicking on the code button
             let manual_loc = code_clicks() * loc_per_clicks();
             // interns hired by clicking the hire interns button
-            let manual_interns = interns_clicks();
+            let manually_hired_interns = interns_clicks();
             // junior devs hired by clicking the hire junior dev button
-            let manual_junior_devs = junior_devs_clicks();
+            let manually_hired_junior_devs = junior_devs_clicks();
             // senior devs hired by clicking the hire senior dev button
-            let manual_senior_devs = senior_devs_clicks();
+            let manually_hired_senior_devs = senior_devs_clicks();
             // hrs hired by clicking the hire HR button
-            let manual_hrs = hrs_clicks();
+            let manually_hired_hrs = hrs_clicks();
             // bugs produced as a byproduct of clicking the code button
             // subtracting bugs removed by clicking the debug button
             let manual_bugs =
@@ -154,31 +161,31 @@ fn Home() -> Element {
             // purchases
             // must be computed before incrementing interns
             let manual_interns_loc_cost = sum_geometric_series(
-                &manual_interns,
+                &manually_hired_interns,
                 &constants.interns_loc_base_cost,
                 &constants.interns_loc_growth_rate,
-                &interns(),
+                &manual_interns(),
             );
             // must be computed before incrementing junior_devs
             let manual_junior_devs_loc_cost = sum_geometric_series(
-                &manual_junior_devs,
+                &manually_hired_junior_devs,
                 &constants.junior_devs_loc_base_cost,
                 &constants.junior_devs_loc_growth_rate,
-                &junior_devs(),
+                &manual_junior_devs(),
             );
             // must be computed before incrementing senior_devs
             let manual_senior_devs_loc_cost = sum_geometric_series(
-                &manual_senior_devs,
+                &manually_hired_senior_devs,
                 &constants.senior_devs_loc_base_cost,
                 &constants.senior_devs_loc_growth_rate,
-                &senior_devs(),
+                &manual_senior_devs(),
             );
             // must be computed before incrementing senior_devs
             let manual_hrs_loc_cost = sum_geometric_series(
-                &manual_hrs,
+                &manually_hired_hrs,
                 &constants.hrs_loc_base_cost,
                 &constants.hrs_loc_growth_rate,
-                &hrs(),
+                &manual_hrs(),
             );
 
             // multipliers
@@ -218,24 +225,33 @@ fn Home() -> Element {
             let auto_junior_devs = hrs() * hrs_junior_devs_dt() * hrs_junior_devs_quota() * dt();
             let auto_senior_devs = hrs() * hrs_senior_devs_dt() * hrs_senior_devs_quota() * dt();
 
-            // update interns, junior devs, senior devs count, accounting for all sources
-            interns += manual_interns + auto_interns;
-            junior_devs += manual_junior_devs + auto_junior_devs;
-            senior_devs += manual_senior_devs + auto_senior_devs;
-            hrs += manual_hrs;
+            // update manualy hired <interns/junior/senior/hr>
+            manual_interns += manually_hired_interns;
+            manual_junior_devs += manually_hired_junior_devs;
+            manual_senior_devs += manually_hired_senior_devs;
+            manual_hrs += manually_hired_hrs;
 
-            // handle promotions
+            // update interns, junior devs, senior devs count, accounting for all sources
+            interns += manually_hired_interns + auto_interns;
+            junior_devs += manually_hired_junior_devs + auto_junior_devs;
+            senior_devs += manually_hired_senior_devs + auto_senior_devs;
+            hrs += manually_hired_hrs;
+
+            // handle promotions & retirement...
             *retired_devs.write() += senior_devs() * senior_devs_retirement_ratio_dt() * dt();
             *senior_devs.write() = senior_devs() * (Decimal::ONE - senior_devs_retirement_ratio_dt() * dt());
+            *manual_senior_devs.write() = manual_senior_devs() * (Decimal::ONE - senior_devs_retirement_ratio_dt() * dt());
 
             if researched().contains("junior_devs_promotion") {
                 *senior_devs.write() += junior_devs() * junior_devs_promotion_ratio_dt() * dt();
                 *junior_devs.write() = junior_devs() * (Decimal::ONE - junior_devs_promotion_ratio_dt() * dt());
+                *manual_junior_devs.write() = manual_junior_devs() * (Decimal::ONE - junior_devs_promotion_ratio_dt() * dt());
             }
 
             if researched().contains("interns_promotion") {
                 *junior_devs.write() += interns() * interns_promotion_ratio_dt() * dt();
                 *interns.write() = interns() * (Decimal::ONE - interns_promotion_ratio_dt() * dt());
+                *manual_interns.write() = manual_interns() * (Decimal::ONE - interns_promotion_ratio_dt() * dt());
             }
 
             // handle rm -rf
@@ -329,10 +345,10 @@ fn Home() -> Element {
     );
 
     let repeatable_actions_rendered = vec![
-        ("hire intern", "Produces loc, and bugs", interns_clicks, interns, constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some("internship".to_string())),
-        ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, junior_devs, constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some("junior_devs_position".to_string())),
-        ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, senior_devs, constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some("senior_devs_position".to_string())),
-        ("hire HR", "Hire devs", hrs_clicks, hrs, constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some("human_resources".to_string())),
+        ("hire intern", "Produces loc, and bugs", interns_clicks, manual_interns, constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some("internship".to_string())),
+        ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, manual_junior_devs, constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some("junior_devs_position".to_string())),
+        ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, manual_senior_devs, constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some("senior_devs_position".to_string())),
+        ("hire HR", "Hire devs", hrs_clicks, manual_hrs, constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some("human_resources".to_string())),
         ("rm -rf", "Wipe out all loc and bugs", rmrf_clicks, placeholder, Decimal::ZERO, Decimal::ONE, Some("rmrf".to_string())),
     ].into_iter().map(|(button_name, description, clicks, produced, loc_base_cost, loc_growth_rate, require)|
         rsx! {
