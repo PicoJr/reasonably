@@ -125,9 +125,6 @@ fn Home() -> Element {
     let hrs_senior_devs_dt: Signal<Decimal> = use_signal(|| constants.hrs_senior_devs_dt);
     let hrs_senior_devs_quota: Signal<Decimal> = use_signal(|| constants.hrs_senior_devs_quota);
 
-    // placeholder
-    let placeholder: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-
     // promotions & retirement
     // interns -> junior devs
     let interns_promotion_ratio_dt: Signal<Decimal> = use_signal(|| constants.interns_promotion_ratio_dt);
@@ -345,11 +342,11 @@ fn Home() -> Element {
     );
 
     let repeatable_actions_rendered = vec![
-        ("hire intern", "Produces loc, and bugs", interns_clicks, manual_interns, constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some(Research::Internship)),
-        ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, manual_junior_devs, constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some(Research::JuniorDevsPosition)),
-        ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, manual_senior_devs, constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some(Research::SeniorDevsPosition)),
-        ("hire HR", "Hire devs", hrs_clicks, manual_hrs, constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some(Research::HumanResources)),
-        ("rm -rf", "Wipe out all loc and bugs", rmrf_clicks, placeholder, Decimal::ZERO, Decimal::ONE, Some(Research::Rmrf)),
+        ("hire intern", "Produces loc, and bugs", interns_clicks, Some(manual_interns), constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some(Research::Internship)),
+        ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, Some(manual_junior_devs), constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some(Research::JuniorDevsPosition)),
+        ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, Some(manual_senior_devs), constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some(Research::SeniorDevsPosition)),
+        ("hire HR", "Hire devs", hrs_clicks, Some(manual_hrs), constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some(Research::HumanResources)),
+        ("rm -rf", "Wipe out all loc and bugs", rmrf_clicks, None, Decimal::ZERO, Decimal::ONE, Some(Research::Rmrf)),
     ].into_iter().map(|(button_name, description, clicks, produced, loc_base_cost, loc_growth_rate, require)|
         rsx! {
             RepeatableAction{

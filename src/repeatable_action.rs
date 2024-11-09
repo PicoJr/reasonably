@@ -17,7 +17,7 @@ pub(crate) fn RepeatableAction(
     mut clicks: Signal<Decimal>,
     loc: Signal<Decimal>,
     require: Option<Research>,
-    produced: Signal<Decimal>,
+    produced: Option<Signal<Decimal>>,
     button_name: String,
     debug_message: String,
     description: String,
@@ -28,7 +28,11 @@ pub(crate) fn RepeatableAction(
         || true,
         |research_name_required| researched().contains(&research_name_required)
     );
-    let new_instances = produced() + clicks();
+    let new_instances = if let Some(produced) = produced {
+        produced() + clicks()
+    } else {
+        Decimal::ZERO
+    };
     let loc_cost = loc_base_cost * loc_growth_rate.pow(&new_instances);
     let disabled = loc() < loc_cost;
     rsx! {
