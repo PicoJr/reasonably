@@ -78,6 +78,7 @@ fn Home() -> Element {
     // stats
     let mut loc_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut bugs_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut features_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // clicks
     let mut code_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
@@ -87,6 +88,7 @@ fn Home() -> Element {
     let mut senior_devs_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut rmrf_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut hrs_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut pms_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // production per clicks
     let loc_per_clicks: Signal<Decimal> = use_signal(|| constants.loc_per_clicks);
@@ -101,6 +103,7 @@ fn Home() -> Element {
     // resources
     let mut loc: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut bugs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut features: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // producers
     // <interns/junior/senior> recruited manually by clicking the hire <interns/junior/senior> button
@@ -109,6 +112,7 @@ fn Home() -> Element {
     let mut manual_junior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut manual_senior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut manual_hrs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let mut manual_pms: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     let mut interns: Signal<Decimal> = use_signal(|| Decimal::ZERO);
     let mut interns_loc_dt: Signal<Decimal> = use_signal(|| constants.interns_loc_dt);
@@ -124,6 +128,8 @@ fn Home() -> Element {
     let hrs_junior_devs_quota: Signal<Decimal> = use_signal(|| constants.hrs_junior_devs_quota);
     let hrs_senior_devs_dt: Signal<Decimal> = use_signal(|| constants.hrs_senior_devs_dt);
     let hrs_senior_devs_quota: Signal<Decimal> = use_signal(|| constants.hrs_senior_devs_quota);
+    let mut pms: Signal<Decimal> = use_signal(|| Decimal::ZERO);
+    let pms_bugs_conversion_dt: Signal<Decimal> = use_signal(|| constants.pms_bugs_conversion_dt);
 
     // promotions & retirement
     // interns -> junior devs
@@ -150,6 +156,9 @@ fn Home() -> Element {
             let manually_hired_senior_devs = senior_devs_clicks();
             // hrs hired by clicking the hire HR button
             let manually_hired_hrs = hrs_clicks();
+            // pms hired by clicking the hire PM button
+            let manually_hired_pms = pms_clicks();
+
             // bugs produced as a byproduct of clicking the code button
             // subtracting bugs removed by clicking the debug button
             let manual_bugs =
@@ -177,12 +186,19 @@ fn Home() -> Element {
                 &constants.senior_devs_loc_growth_rate,
                 &manual_senior_devs(),
             );
-            // must be computed before incrementing senior_devs
+            // must be computed before incrementing hrs
             let manual_hrs_loc_cost = sum_geometric_series(
                 &manually_hired_hrs,
                 &constants.hrs_loc_base_cost,
                 &constants.hrs_loc_growth_rate,
                 &manual_hrs(),
+            );
+            // must be computed before incrementing pms
+            let manual_pms_loc_cost = sum_geometric_series(
+                &manually_hired_pms,
+                &constants.pms_loc_base_cost,
+                &constants.pms_loc_growth_rate,
+                &manual_pms(),
             );
 
             // multipliers
@@ -204,19 +220,28 @@ fn Home() -> Element {
                     + senior_devs() * senior_devs_loc_dt() * senior_devs_bugs_ratio()
             ) * dt();
 
+            let auto_bugs_converted_capacity = pms() * pms_bugs_conversion_dt() * dt();
+            // make sure we do not convert more bugs than available
+            let bugs_converted = bugs().min(&auto_bugs_converted_capacity);
+
             // update loc, accounting all sources
             loc += manual_loc + auto_loc - (
-                manual_interns_loc_cost + manual_junior_devs_loc_cost + manual_senior_devs_loc_cost + manual_hrs_loc_cost
+                manual_interns_loc_cost + manual_junior_devs_loc_cost + manual_senior_devs_loc_cost + manual_hrs_loc_cost + manual_pms_loc_cost
             );
             // update live code metrics
             *loc_dt.write() =
                 (manual_loc + auto_loc) * dt_seconds;
 
             // update bugs, accounting for all sources
-            bugs += manual_bugs + auto_bugs;
+            bugs += manual_bugs + auto_bugs - bugs_converted;
             // update live code metrics
             *bugs_dt.write() =
                 (manual_bugs + auto_bugs) * dt_seconds;
+
+            features += bugs_converted;
+            // update live code metrics
+            *features_dt.write() = features * dt_seconds;
+
 
             let auto_interns = hrs() * hrs_interns_dt() * hrs_interns_quota() * dt();
             let auto_junior_devs = hrs() * hrs_junior_devs_dt() * hrs_junior_devs_quota() * dt();
@@ -233,6 +258,7 @@ fn Home() -> Element {
             junior_devs += manually_hired_junior_devs + auto_junior_devs;
             senior_devs += manually_hired_senior_devs + auto_senior_devs;
             hrs += manually_hired_hrs;
+            pms += manually_hired_pms;
 
             // handle promotions & retirement...
             *retired_devs.write() += senior_devs() * senior_devs_retirement_ratio_dt() * dt();
@@ -264,6 +290,7 @@ fn Home() -> Element {
             *junior_devs_clicks.write() = Decimal::ZERO;
             *senior_devs_clicks.write() = Decimal::ZERO;
             *hrs_clicks.write() = Decimal::ZERO;
+            *pms_clicks.write() = Decimal::ZERO;
             *rmrf_clicks.write() = Decimal::ZERO;
 
             // update current time
@@ -288,6 +315,7 @@ fn Home() -> Element {
         (Research::ToggleTheme, "install theme", "Allow toggling theme", constants.research_toggle_theme_loc_cost, None, None),
         (Research::SyntaxColoringMultiplier, "install syntax coloring", "Boost interns loc/s x2", constants.research_syntax_coloring_multiplier_loc_cost, None, Some(Research::SyntaxColoringMultiplierAlias)),
         (Research::HumanResources, "research human resources", "Allow hiring HR, who hire devs", constants.research_human_resources_loc_cost, Some(Research::SeniorDevsPosition), None),
+        (Research::ProjectManagement, "research project management", "Allow hiring PMs, who convert bugs to features", constants.research_project_management_loc_cost, Some(Research::HumanResources), None),
     ].into_iter().map(|(research_name, button_name, description, loc_cost, require, alias)|
          rsx! {
             ResearchOnce{
@@ -346,6 +374,7 @@ fn Home() -> Element {
         ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, Some(manual_junior_devs), constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some(Research::JuniorDevsPosition)),
         ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, Some(manual_senior_devs), constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some(Research::SeniorDevsPosition)),
         ("hire HR", "Hire devs", hrs_clicks, Some(manual_hrs), constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some(Research::HumanResources)),
+        ("hire PM", "Convert bugs to features", pms_clicks, Some(manual_pms), constants.pms_loc_base_cost, constants.pms_loc_growth_rate, Some(Research::ProjectManagement)),
         ("rm -rf", "Wipe out all loc and bugs", rmrf_clicks, None, Decimal::ZERO, Decimal::ONE, Some(Research::Rmrf)),
     ].into_iter().map(|(button_name, description, clicks, produced, loc_base_cost, loc_growth_rate, require)|
         rsx! {
@@ -386,6 +415,7 @@ fn Home() -> Element {
                     loc_dt: loc_dt,
                     bugs_dt: bugs_dt,
                     dt: dt,
+                    features_dt: features_dt,
                 }
                 if loc() > Decimal::ZERO {
                     Resources {
@@ -396,6 +426,7 @@ fn Home() -> Element {
                         senior_devs: senior_devs,
                         retired_devs: retired_devs,
                         hrs: hrs,
+                        pms: pms,
                     }
                 }
             }

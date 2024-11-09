@@ -10,14 +10,18 @@ pub(crate) struct GameConstants {
     // senior devs recruitment cost
     pub senior_devs_loc_base_cost: Decimal,
     pub senior_devs_loc_growth_rate: Decimal,
-    // hr recruitement cost
+    // hr recruitment cost
     pub hrs_loc_base_cost: Decimal,
     pub hrs_loc_growth_rate: Decimal,
+    // pm recruitment cost
+    pub pms_loc_base_cost: Decimal,
+    pub pms_loc_growth_rate: Decimal,
     // research once costs
     pub research_internship_loc_cost: Decimal,
     pub research_junior_devs_position_loc_cost: Decimal,
     pub research_senior_devs_position_loc_cost: Decimal,
     pub research_human_resources_loc_cost: Decimal,
+    pub research_project_management_loc_cost: Decimal,
     pub research_interns_promotion_loc_cost: Decimal,
     pub research_junior_devs_promotion_loc_cost: Decimal,
     pub research_code_metrics_loc_cost: Decimal,
@@ -41,6 +45,8 @@ pub(crate) struct GameConstants {
     pub hrs_junior_devs_quota: Decimal,
     pub hrs_senior_devs_dt: Decimal,
     pub hrs_senior_devs_quota: Decimal,
+    // pm bugs conversion
+    pub pms_bugs_conversion_dt: Decimal,
     // manual loc production
     pub loc_per_clicks: Decimal,
     pub debug_per_clicks: Decimal,
@@ -82,10 +88,13 @@ impl Default for GameConstants {
             senior_devs_loc_growth_rate: Decimal::new(1.0175),
             hrs_loc_base_cost: Decimal::new(15_000.0),
             hrs_loc_growth_rate: Decimal::new(1.0175),
+            pms_loc_base_cost: Decimal::new(15_000.0),
+            pms_loc_growth_rate: Decimal::new(1.0175),
             research_internship_loc_cost: Decimal::new(1.0),
             research_junior_devs_position_loc_cost: Decimal::new(1.0),
             research_senior_devs_position_loc_cost: Decimal::new(1.0),
             research_human_resources_loc_cost: Decimal::new(1.0),
+            research_project_management_loc_cost: Decimal::new(1.0),
             research_interns_promotion_loc_cost: Decimal::new(1.0),
             research_junior_devs_promotion_loc_cost: Decimal::new(1.0),
             research_code_metrics_loc_cost: Decimal::new(1.0),
@@ -106,6 +115,7 @@ impl Default for GameConstants {
             hrs_junior_devs_quota: Decimal::new(0.09),
             hrs_senior_devs_dt: Decimal::new(1e-4),
             hrs_senior_devs_quota: Decimal::new(0.01),
+            pms_bugs_conversion_dt: Decimal::new(1.0),
             loc_per_clicks: Decimal::new(1.0),
             debug_per_clicks: Decimal::new(1.0),
             manual_bugs_ratio: Decimal::new(1.0),
@@ -162,6 +172,7 @@ pub(crate) enum Research {
     Logs,
     Mouse,
     PhysicsEngine,
+    ProjectManagement,
     Rmrf,
     SeniorDevsPosition,
     SolarSystem,

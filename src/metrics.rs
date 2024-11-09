@@ -6,7 +6,7 @@ use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal};
 use dioxus::prelude::*;
 use crate::constants::Research;
-use crate::format_decimal::{format_decimal_loc, format_decimal_bugs};
+use crate::format_decimal::{format_decimal_loc, format_decimal_bugs, format_decimal_features};
 
 #[component]
 pub(crate) fn Metrics(
@@ -14,6 +14,7 @@ pub(crate) fn Metrics(
     loc_dt: Signal<Decimal>,
     bugs_dt: Signal<Decimal>,
     dt: Signal<Decimal>,
+    features_dt: Signal<Decimal>,
 ) -> Element {
     rsx! {
         if researched().contains(&Research::CodeMetrics) {
@@ -43,6 +44,13 @@ pub(crate) fn Metrics(
                         td {
                             class: "table-value",
                             "{format_decimal_bugs(bugs_dt())}"
+                        }
+                    }
+                    tr {
+                        td {"feature/s"}
+                        td {
+                            class: "table-value",
+                            "{format_decimal_features(features_dt())}"
                         }
                     }
                     if researched().contains(&Research::Cheating) {
