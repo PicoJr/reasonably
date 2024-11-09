@@ -4,6 +4,7 @@ use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Readable, Signal};
 use dioxus::prelude::*;
+use crate::constants::Research;
 
 pub(crate) struct SimpleLogs {
     max_lines: usize,
@@ -33,11 +34,11 @@ impl SimpleLogs {
 
 #[component]
 pub(crate) fn Logs(
-    researched: Signal<HashSet<String>>,
+    researched: Signal<HashSet<Research>>,
     logs: Signal<SimpleLogs>
 ) -> Element {
     rsx! {
-        if researched().contains("logs") {
+        if researched().contains(&Research::Logs) {
             div {
                 class: "logs",
                 {logs.read().render()}

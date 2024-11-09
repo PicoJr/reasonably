@@ -5,6 +5,7 @@ use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
+use crate::constants::Research;
 
 use crate::simple_logs::SimpleLogs;
 use crate::format_decimal::format_decimal_loc;
@@ -12,10 +13,10 @@ use crate::format_decimal::format_decimal_loc;
 #[component]
 pub(crate) fn RepeatableAction(
     mut logs: Signal<SimpleLogs>,
-    mut researched: Signal<HashSet<String>>,
+    mut researched: Signal<HashSet<Research>>,
     mut clicks: Signal<Decimal>,
     loc: Signal<Decimal>,
-    require: Option<String>,
+    require: Option<Research>,
     produced: Signal<Decimal>,
     button_name: String,
     debug_message: String,
@@ -25,7 +26,7 @@ pub(crate) fn RepeatableAction(
 ) -> Element {
     let requirements_met = require.map_or_else(
         || true,
-        |research_name_required| researched().contains(research_name_required.as_str())
+        |research_name_required| researched().contains(&research_name_required)
     );
     let new_instances = produced() + clicks();
     let loc_cost = loc_base_cost * loc_growth_rate.pow(&new_instances);

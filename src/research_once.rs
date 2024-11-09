@@ -5,6 +5,7 @@ use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
+use crate::constants::Research;
 
 use crate::simple_logs::SimpleLogs;
 use crate::format_decimal::format_decimal_loc;
@@ -12,11 +13,11 @@ use crate::format_decimal::format_decimal_loc;
 #[component]
 pub(crate) fn ResearchOnce(
     mut logs: Signal<SimpleLogs>,
-    mut researched: Signal<HashSet<String>>,
+    mut researched: Signal<HashSet<Research>>,
     mut loc: Signal<Decimal>,
-    research_name: String,
-    research_alias: Option<String>, // also insert this alias in `researched`
-    require: Option<String>,
+    research_name: Research,
+    research_alias: Option<Research>, // also insert this alias in `researched`
+    require: Option<Research>,
     button_name: String,
     debug_message: String,
     description: String,
@@ -30,10 +31,10 @@ pub(crate) fn ResearchOnce(
     };
     let disabled = loc() < loc_cost;
     // only show if not researched already
-    let already_researched = researched().contains(research_name.as_str());
+    let already_researched = researched().contains(&research_name);
     let requirements_met = require.map_or_else(
         || true,
-        |research_name_required| researched().contains(research_name_required.as_str())
+        |research_name_required| researched().contains(&research_name_required)
     );
     rsx! {
         if !already_researched && requirements_met {

@@ -5,17 +5,18 @@ use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal};
 use dioxus::prelude::*;
+use crate::constants::Research;
 use crate::format_decimal::{format_decimal_loc, format_decimal_bugs};
 
 #[component]
 pub(crate) fn Metrics(
-    researched: Signal<HashSet<String>>,
+    researched: Signal<HashSet<Research>>,
     loc_dt: Signal<Decimal>,
     bugs_dt: Signal<Decimal>,
     dt: Signal<Decimal>,
 ) -> Element {
     rsx! {
-        if researched().contains("code_metrics") {
+        if researched().contains(&Research::CodeMetrics) {
             div {
                 class: "metrics",
                 table {
@@ -44,7 +45,7 @@ pub(crate) fn Metrics(
                             "{format_decimal_bugs(bugs_dt())}"
                         }
                     }
-                    if researched().contains("cheating") {
+                    if researched().contains(&Research::Cheating) {
                         tr {
                             td {"dt"}
                             td {

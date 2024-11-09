@@ -4,6 +4,7 @@ use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
+use crate::constants::Research;
 
 use crate::simple_logs::SimpleLogs;
 use crate::Theme;
@@ -11,12 +12,12 @@ use crate::Theme;
 #[component]
 pub(crate) fn ToggleThemeAction(
     mut logs: Signal<SimpleLogs>,
-    mut researched: Signal<HashSet<String>>,
+    mut researched: Signal<HashSet<Research>>,
     mut theme: Signal<Theme>,
 ) -> Element {
     let current_theme: Theme = theme();
     rsx! {
-        if researched().contains("toggle_theme") {
+        if researched().contains(&Research::ToggleTheme) {
             button {
                 class: "repeatable-action-button",
                 onclick: move |_| {

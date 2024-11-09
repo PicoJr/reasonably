@@ -7,10 +7,11 @@ use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal};
 use dioxus::prelude::*;
+use crate::constants::Research;
 
 #[component]
 pub(crate) fn Speedrun(
-    researched: Signal<HashSet<String>>,
+    researched: Signal<HashSet<Research>>,
     loc: Signal<Decimal>,
     speedrun_start: Signal<Option<Instant>>,
     current_time: Signal<Instant>,
@@ -29,7 +30,7 @@ pub(crate) fn Speedrun(
         "timer not started".to_string()
     };
     rsx! {
-        if researched().contains("speedrun") {
+        if researched().contains(&Research::Speedrun) {
             div {
                 class: "speedrun",
                 table {

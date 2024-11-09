@@ -133,3 +133,42 @@ impl Default for GameConstants {
         }
     }
 }
+
+/**
+ *For optimization purpose: avoid using String when all research names are known ahead of time
+ */
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[repr(u32)]
+pub(crate) enum Research {
+    Bacteria,
+    Browser,
+    Calculator,
+    Cheating,
+    Climate,
+    CodeMetrics,
+    Differentiation,
+    Earth,
+    Economy,
+    FizzBuzz,
+    GameOfLife,
+    HelloWorld,
+    HumanBrain,
+    HumanResources,
+    Internship,
+    InternsPromotion,
+    JuniorDevsPosition,
+    JuniorDevsPromotion,
+    Kernel,
+    Logs,
+    Mouse,
+    PhysicsEngine,
+    Rmrf,
+    SeniorDevsPosition,
+    SolarSystem,
+    Speedrun,
+    SyntaxColoringMultiplier,
+    SyntaxColoringMultiplierAlias,
+    TextEditor,
+    ToggleTheme,
+    Universe,
+}

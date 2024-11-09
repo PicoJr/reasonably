@@ -28,7 +28,7 @@ use dioxus_logger::tracing::{info, Level};
 use async_std::task::sleep;
 use crate::cheat_action::CheatAction;
 use crate::code_action::CodeAction;
-use crate::constants::GameConstants;
+use crate::constants::{GameConstants, Research};
 use crate::debug_action::DebugAction;
 use crate::metrics::Metrics;
 use crate::resources::Resources;
@@ -64,10 +64,10 @@ fn Home() -> Element {
     let constants = GameConstants::default();
 
     let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
-    let mut researched: Signal<HashSet<String>> = use_signal(
+    let mut researched: Signal<HashSet<Research>> = use_signal(
         || {
             let mut researches = HashSet::new();
-            researches.insert("cheating".to_string());
+            researches.insert(Research::Cheating);
             researches
         }
     );
@@ -189,9 +189,9 @@ fn Home() -> Element {
             );
 
             // multipliers
-            if researched().contains("syntax_coloring_multiplier_alias") {
+            if researched().contains(&Research::SyntaxColoringMultiplierAlias) {
                 *interns_loc_dt.write() *= constants.research_syntax_coloring_multiplier;
-                researched.write().remove("syntax_coloring_multiplier_alias");
+                researched.write().remove(&Research::SyntaxColoringMultiplierAlias);
             }
 
             // loc produced by devs
@@ -242,13 +242,13 @@ fn Home() -> Element {
             *senior_devs.write() = senior_devs() * (Decimal::ONE - senior_devs_retirement_ratio_dt() * dt());
             *manual_senior_devs.write() = manual_senior_devs() * (Decimal::ONE - senior_devs_retirement_ratio_dt() * dt());
 
-            if researched().contains("junior_devs_promotion") {
+            if researched().contains(&Research::JuniorDevsPromotion) {
                 *senior_devs.write() += junior_devs() * junior_devs_promotion_ratio_dt() * dt();
                 *junior_devs.write() = junior_devs() * (Decimal::ONE - junior_devs_promotion_ratio_dt() * dt());
                 *manual_junior_devs.write() = manual_junior_devs() * (Decimal::ONE - junior_devs_promotion_ratio_dt() * dt());
             }
 
-            if researched().contains("interns_promotion") {
+            if researched().contains(&Research::InternsPromotion) {
                 *junior_devs.write() += interns() * interns_promotion_ratio_dt() * dt();
                 *interns.write() = interns() * (Decimal::ONE - interns_promotion_ratio_dt() * dt());
                 *manual_interns.write() = manual_interns() * (Decimal::ONE - interns_promotion_ratio_dt() * dt());
@@ -278,19 +278,19 @@ fn Home() -> Element {
     });
 
     let research_rendered = vec![
-        ("toggle_theme", "install theme", "Allow toggling theme", constants.research_toggle_theme_loc_cost, None, None),
-        ("internship", "research internship", "Allow hiring interns, who produce loc and bugs automatically.", constants.research_internship_loc_cost, None, None),
-        ("junior_devs_position", "research junior devs", "Allow hiring junior devs, who produce loc and bugs automatically.", constants.research_junior_devs_position_loc_cost, Some("internship".to_string()), None),
-        ("senior_devs_position", "research senior devs", "Allow hiring senior devs, who produce loc and bugs automatically.", constants.research_senior_devs_position_loc_cost, Some("junior_devs_position".to_string()), None),
-        ("code_metrics", "research code metrics", "Display LOC/s and bugs/s.", constants.research_code_metrics_loc_cost, None, None),
-        ("speedrun", "research speedrun", "Display progress and real time timer", constants.research_speedrun_loc_cost, None, None),
-        ("logs", "research logs", "Display logs", constants.research_logs_loc_cost, None, None),
-        ("rmrf", "learn rm -rf", "For desperate situations, allow using rm-rf command", constants.research_rmrf_loc_cost, None, None),
-        ("interns_promotion", "promote interns", "Allow interns to be promoted to junior devs", constants.research_interns_promotion_loc_cost, Some("internship".to_string()), None),
-        ("junior_devs_promotion", "promote junior devs", "Allow junior devs to be promoted to senior devs", constants.research_junior_devs_promotion_loc_cost, Some("interns_promotion".to_string()), None),
-        ("toggle_theme", "install theme", "Allow toggling theme", constants.research_toggle_theme_loc_cost, None, None),
-        ("syntax_coloring_multiplier", "install syntax coloring", "Boost interns loc/s x2", constants.research_syntax_coloring_multiplier_loc_cost, None, Some("syntax_coloring_multiplier_alias".to_string())),
-        ("human_resources", "research human resources", "Allow hiring HR, who hire devs", constants.research_human_resources_loc_cost, Some("senior_devs_position".to_string()), None),
+        (Research::ToggleTheme, "install theme", "Allow toggling theme", constants.research_toggle_theme_loc_cost, None, None),
+        (Research::Internship, "research internship", "Allow hiring interns, who produce loc and bugs automatically.", constants.research_internship_loc_cost, None, None),
+        (Research::JuniorDevsPosition, "research junior devs", "Allow hiring junior devs, who produce loc and bugs automatically.", constants.research_junior_devs_position_loc_cost, Some(Research::Internship), None),
+        (Research::SeniorDevsPosition, "research senior devs", "Allow hiring senior devs, who produce loc and bugs automatically.", constants.research_senior_devs_position_loc_cost, Some(Research::JuniorDevsPosition), None),
+        (Research::CodeMetrics, "research code metrics", "Display LOC/s and bugs/s.", constants.research_code_metrics_loc_cost, None, None),
+        (Research::Speedrun, "research speedrun", "Display progress and real time timer", constants.research_speedrun_loc_cost, None, None),
+        (Research::Logs, "research logs", "Display logs", constants.research_logs_loc_cost, None, None),
+        (Research::Rmrf, "learn rm -rf", "For desperate situations, allow using rm-rf command", constants.research_rmrf_loc_cost, None, None),
+        (Research::InternsPromotion, "promote interns", "Allow interns to be promoted to junior devs", constants.research_interns_promotion_loc_cost, Some(Research::Internship), None),
+        (Research::JuniorDevsPromotion, "promote junior devs", "Allow junior devs to be promoted to senior devs", constants.research_junior_devs_promotion_loc_cost, Some(Research::InternsPromotion), None),
+        (Research::ToggleTheme, "install theme", "Allow toggling theme", constants.research_toggle_theme_loc_cost, None, None),
+        (Research::SyntaxColoringMultiplier, "install syntax coloring", "Boost interns loc/s x2", constants.research_syntax_coloring_multiplier_loc_cost, None, Some(Research::SyntaxColoringMultiplierAlias)),
+        (Research::HumanResources, "research human resources", "Allow hiring HR, who hire devs", constants.research_human_resources_loc_cost, Some(Research::SeniorDevsPosition), None),
     ].into_iter().map(|(research_name, button_name, description, loc_cost, require, alias)|
          rsx! {
             ResearchOnce{
@@ -298,10 +298,10 @@ fn Home() -> Element {
                 researched: researched,
                 loc: loc,
                 require: require,
-                research_name: research_name,
+                research_name: research_name.clone(),
                 research_alias: alias,
                 button_name: button_name,
-                debug_message: format!("{} researched", research_name),
+                debug_message: format!("{:?} researched", research_name.clone()),
                 description: description,
                 loc_cost: loc_cost,
                 quest: false,
@@ -310,23 +310,23 @@ fn Home() -> Element {
     );
 
     let quests_rendered = vec![
-        ("hello_world", "code hello world", "Your 1st program",  None, constants.quest_hello_world_loc_cost),
-        ("fizz_buzz", "code Fizzbuzz", "Your 2nd program",  Some("hello_world".to_string()), constants.quest_fizz_buzz_loc_cost),
-        ("calculator", "code calculator", "Your 3rd program",  Some("fizz_buzz".to_string()), constants.quest_calculator_loc_cost),
-        ("game_of_life", "code game of life", "?",  Some("calculator".to_string()), constants.quest_game_of_life_loc_cost),
-        ("text_editor", "code a text editor", "?",  Some("game_of_life".to_string()), constants.quest_text_editor_loc_cost),
-        ("physics_engine", "code a physics engine", "?",  Some("text_editor".to_string()), constants.quest_physics_engine_loc_cost),
-        ("bacteria", "simulate a bacteria", "?",  Some("physics_engine".to_string()), constants.quest_bacteria_loc_cost),
-        ("browser", "code a browser", "?",  Some("bacteria".to_string()), constants.quest_browser_loc_cost),
-        ("kernel", "code a kernel", "?",  Some("browser".to_string()), constants.quest_kernel_loc_cost),
-        ("mouse", "simulate a mouse", "?",  Some("kernel".to_string()), constants.quest_mouse_loc_cost),
-        ("human_brain", "simulate a human brain", "?",  Some("mouse".to_string()), constants.quest_human_brain_loc_cost),
-        ("economy", "simulate the economy", "?",  Some("human_brain".to_string()), constants.quest_economy_loc_cost),
-        ("climate", "simulate the climate", "?",  Some("economy".to_string()), constants.quest_climate_loc_cost),
-        ("earth", "simulate the Earth", "?",  Some("climate".to_string()), constants.quest_earth_loc_cost),
-        ("solar_system", "simulate the solar system", "?",  Some("earth".to_string()), constants.quest_solar_system_loc_cost),
-        ("universe", "simulate the universe", "?",  Some("solar_system".to_string()), constants.quest_universe_loc_cost),
-        ("differentiation", "differentiate the simulation", "?",  Some("universe".to_string()), constants.quest_differentiation_loc_cost),
+        (Research::HelloWorld, "code hello world", "Your 1st program",  None, constants.quest_hello_world_loc_cost),
+        (Research::FizzBuzz, "code Fizzbuzz", "Your 2nd program",  Some(Research::HelloWorld), constants.quest_fizz_buzz_loc_cost),
+        (Research::Calculator, "code calculator", "Your 3rd program",  Some(Research::FizzBuzz), constants.quest_calculator_loc_cost),
+        (Research::GameOfLife, "code game of life", "?",  Some(Research::Calculator), constants.quest_game_of_life_loc_cost),
+        (Research::TextEditor, "code a text editor", "?",  Some(Research::GameOfLife), constants.quest_text_editor_loc_cost),
+        (Research::PhysicsEngine, "code a physics engine", "?",  Some(Research::TextEditor), constants.quest_physics_engine_loc_cost),
+        (Research::Bacteria, "simulate a bacteria", "?",  Some(Research::PhysicsEngine), constants.quest_bacteria_loc_cost),
+        (Research::Browser, "code a browser", "?",  Some(Research::Bacteria), constants.quest_browser_loc_cost),
+        (Research::Kernel, "code a kernel", "?",  Some(Research::Browser), constants.quest_kernel_loc_cost),
+        (Research::Mouse, "simulate a mouse", "?",  Some(Research::Kernel), constants.quest_mouse_loc_cost),
+        (Research::HumanBrain, "simulate a human brain", "?",  Some(Research::Mouse), constants.quest_human_brain_loc_cost),
+        (Research::Economy, "simulate the economy", "?",  Some(Research::HumanBrain), constants.quest_economy_loc_cost),
+        (Research::Climate, "simulate the climate", "?",  Some(Research::Economy), constants.quest_climate_loc_cost),
+        (Research::Earth, "simulate the Earth", "?",  Some(Research::Climate), constants.quest_earth_loc_cost),
+        (Research::SolarSystem, "simulate the solar system", "?",  Some(Research::Earth), constants.quest_solar_system_loc_cost),
+        (Research::Universe, "simulate the universe", "?",  Some(Research::SolarSystem), constants.quest_universe_loc_cost),
+        (Research::Differentiation, "differentiate the simulation", "?",  Some(Research::Universe), constants.quest_differentiation_loc_cost),
     ].into_iter().map(|(name, button_name, description, require, loc_cost)|
         rsx! {
             ResearchOnce{
@@ -345,11 +345,11 @@ fn Home() -> Element {
     );
 
     let repeatable_actions_rendered = vec![
-        ("hire intern", "Produces loc, and bugs", interns_clicks, manual_interns, constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some("internship".to_string())),
-        ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, manual_junior_devs, constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some("junior_devs_position".to_string())),
-        ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, manual_senior_devs, constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some("senior_devs_position".to_string())),
-        ("hire HR", "Hire devs", hrs_clicks, manual_hrs, constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some("human_resources".to_string())),
-        ("rm -rf", "Wipe out all loc and bugs", rmrf_clicks, placeholder, Decimal::ZERO, Decimal::ONE, Some("rmrf".to_string())),
+        ("hire intern", "Produces loc, and bugs", interns_clicks, manual_interns, constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some(Research::Internship)),
+        ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, manual_junior_devs, constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some(Research::JuniorDevsPosition)),
+        ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, manual_senior_devs, constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some(Research::SeniorDevsPosition)),
+        ("hire HR", "Hire devs", hrs_clicks, manual_hrs, constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some(Research::HumanResources)),
+        ("rm -rf", "Wipe out all loc and bugs", rmrf_clicks, placeholder, Decimal::ZERO, Decimal::ONE, Some(Research::Rmrf)),
     ].into_iter().map(|(button_name, description, clicks, produced, loc_base_cost, loc_growth_rate, require)|
         rsx! {
             RepeatableAction{
@@ -423,7 +423,7 @@ fn Home() -> Element {
                         theme: theme,
                     }
                     {repeatable_actions_rendered}
-                    if researched().contains("cheating") {
+                    if researched().contains(&Research::Cheating) {
                         CheatAction{
                             logs: logs,
                             value: loc,
