@@ -5,17 +5,11 @@ use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal};
 use dioxus::prelude::*;
 use crate::format_decimal::{format_decimal_loc, format_decimal_bugs, format_decimal_devs, format_decimal_hrs, format_decimal_pms};
+use crate::state::State;
 
 #[component]
 pub(crate) fn Resources(
-    loc: Signal<Decimal>,
-    bugs: Signal<Decimal>,
-    interns: Signal<Decimal>,
-    junior_devs: Signal<Decimal>,
-    senior_devs: Signal<Decimal>,
-    retired_devs: Signal<Decimal>,
-    hrs: Signal<Decimal>,
-    pms: Signal<Decimal>,
+    state: Signal<State>,
 ) -> Element {
     rsx! {
         div {
@@ -32,75 +26,75 @@ pub(crate) fn Resources(
                         "value"
                     }
                 }
-                if loc() > Decimal::ZERO {
+                if state.read().loc > Decimal::ZERO {
                     tr {
                         td {"Lines of code"}
                         td {
                             class: "table-value",
-                            "{format_decimal_loc(loc())}"
+                            "{format_decimal_loc(state.read().loc)}"
                         }
                     }
                 }
-                if bugs() > Decimal::ZERO {
+                if state.read().bugs > Decimal::ZERO {
                     tr {
                         td{"Bugs"}
                         td{
                             class: "table-value",
-                            "{format_decimal_bugs(bugs())}"
+                            "{format_decimal_bugs(state.read().bugs)}"
                         }
                     }
                 }
-                if interns() > Decimal::ZERO {
+                if state.read().interns > Decimal::ZERO {
                     tr {
                         td {"Interns"}
                         td {
                             class: "table-value",
-                            "{format_decimal_devs(interns())}"
+                            "{format_decimal_devs(state.read().interns)}"
                         }
                     }
                 }
-                if junior_devs() > Decimal::ZERO {
+                if state.read().junior_devs > Decimal::ZERO {
                     tr {
                         td {"Junior devs"}
                         td {
                             class: "table-value",
-                            "{format_decimal_devs(junior_devs())}"
+                            "{format_decimal_devs(state.read().junior_devs)}"
                         }
                     }
                 }
-                if senior_devs() > Decimal::ZERO {
+                if state.read().senior_devs > Decimal::ZERO {
                     tr {
                         td{"Senior devs"}
                         td{
                             class: "table-value",
-                            "{format_decimal_devs(senior_devs())}"
+                            "{format_decimal_devs(state.read().senior_devs)}"
                         }
                     }
                 }
-                if retired_devs() > Decimal::ZERO {
+                if state.read().retired_devs > Decimal::ZERO {
                     tr {
                         td{"Retired devs"}
                         td{
                             class: "table-value",
-                            "{format_decimal_devs(retired_devs())}"
+                            "{format_decimal_devs(state.read().retired_devs)}"
                         }
                     }
                 }
-                if hrs() > Decimal::ZERO {
+                if state.read().hrs > Decimal::ZERO {
                     tr {
                         td{"HRs"}
                         td{
                             class: "table-value",
-                            "{format_decimal_hrs(hrs())}"
+                            "{format_decimal_hrs(state.read().hrs)}"
                         }
                     }
                 }
-                if pms() > Decimal::ZERO {
+                if state.read().pms > Decimal::ZERO {
                     tr {
                         td{"PMs"}
                         td{
                             class: "table-value",
-                            "{format_decimal_pms(pms())}"
+                            "{format_decimal_pms(state.read().pms)}"
                         }
                     }
                 }

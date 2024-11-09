@@ -1,30 +1,27 @@
 #![allow(non_snake_case)]
-use std::collections::HashSet;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
 use crate::constants::Research;
 
-use crate::simple_logs::SimpleLogs;
+use crate::state::State;
 use crate::Theme;
 
 #[component]
 pub(crate) fn ToggleThemeAction(
-    mut logs: Signal<SimpleLogs>,
-    mut researched: Signal<HashSet<Research>>,
-    mut theme: Signal<Theme>,
+    mut state: Signal<State>,
 ) -> Element {
-    let current_theme: Theme = theme();
+    let current_theme: Theme = state.read().theme.clone();
     rsx! {
-        if researched().contains(&Research::ToggleTheme) {
+        if state.read().researched.contains(&Research::ToggleTheme) {
             button {
                 class: "repeatable-action-button",
                 onclick: move |_| {
                 match current_theme {
                     Theme::LightTheme => {
-                        *theme.write() = Theme::DarkTheme;
-                        logs.write().log(
+                        state.write().theme = Theme::DarkTheme;
+                        state.write().logs.log(
                             "toggling theme...now dark"
                         );
                         spawn(async move {
@@ -35,8 +32,8 @@ pub(crate) fn ToggleThemeAction(
                         });
                     },
                     Theme::DarkTheme => {
-                        *theme.write() = Theme::LightTheme;
-                        logs.write().log(
+                        state.write().theme = Theme::LightTheme;
+                        state.write().logs.log(
                             "toggling theme...now light"
                         );
                         spawn(async move {

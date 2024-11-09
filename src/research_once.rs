@@ -1,5 +1,4 @@
 #![allow(non_snake_case)]
-use std::collections::HashSet;
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
@@ -7,14 +6,12 @@ use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
 use crate::constants::Research;
 
-use crate::simple_logs::SimpleLogs;
 use crate::format_decimal::format_decimal_loc;
+use crate::state::State;
 
 #[component]
 pub(crate) fn ResearchOnce(
-    mut logs: Signal<SimpleLogs>,
-    mut researched: Signal<HashSet<Research>>,
-    mut loc: Signal<Decimal>,
+    mut state: Signal<State>,
     research_name: Research,
     research_alias: Option<Research>, // also insert this alias in `researched`
     require: Option<Research>,
@@ -29,12 +26,12 @@ pub(crate) fn ResearchOnce(
     } else {
         ("research", "research-button")
     };
-    let disabled = loc() < loc_cost;
+    let disabled = state.read().loc < loc_cost;
     // only show if not researched already
-    let already_researched = researched().contains(&research_name);
+    let already_researched = state.read().researched.contains(&research_name);
     let requirements_met = require.map_or_else(
         || true,
-        |research_name_required| researched().contains(&research_name_required)
+        |research_name_required| state.read().researched.contains(&research_name_required)
     );
     rsx! {
         if !already_researched && requirements_met {
@@ -46,14 +43,14 @@ pub(crate) fn ResearchOnce(
                     class: css_button_class,
                     disabled: disabled,
                     onclick: move |_| {
-                    researched.write().insert(research_name.clone());
+                    state.write().researched.insert(research_name.clone());
                     if let Some(alias) = &research_alias {
-                        researched.write().insert(alias.clone());
+                        state.write().researched.insert(alias.clone());
                     }
-                    logs.write().log(
+                    state.write().logs.log(
                         &debug_message
                     );
-                    loc -= loc_cost;
+                    state.write().loc -= loc_cost;
                 }
                 , {button_name} }
             }

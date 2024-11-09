@@ -1,23 +1,18 @@
 #![allow(non_snake_case)]
-use std::collections::HashSet;
-use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal};
 use dioxus::prelude::*;
 use crate::constants::Research;
 use crate::format_decimal::{format_decimal_loc, format_decimal_bugs, format_decimal_features};
+use crate::state::State;
 
 #[component]
 pub(crate) fn Metrics(
-    researched: Signal<HashSet<Research>>,
-    loc_dt: Signal<Decimal>,
-    bugs_dt: Signal<Decimal>,
-    dt: Signal<Decimal>,
-    features_dt: Signal<Decimal>,
+    state: Signal<State>,
 ) -> Element {
     rsx! {
-        if researched().contains(&Research::CodeMetrics) {
+        if state.read().researched.contains(&Research::CodeMetrics) {
             div {
                 class: "metrics",
                 table {
@@ -36,29 +31,29 @@ pub(crate) fn Metrics(
                         td {"LOC/s"}
                         td {
                             class: "table-value",
-                            "{format_decimal_loc(loc_dt())}"
+                            "{format_decimal_loc(state.read().loc_dt)}"
                         }
                     }
                     tr {
                         td {"bugs/s"}
                         td {
                             class: "table-value",
-                            "{format_decimal_bugs(bugs_dt())}"
+                            "{format_decimal_bugs(state.read().bugs_dt)}"
                         }
                     }
                     tr {
                         td {"feature/s"}
                         td {
                             class: "table-value",
-                            "{format_decimal_features(features_dt())}"
+                            "{format_decimal_features(state.read().features_dt)}"
                         }
                     }
-                    if researched().contains(&Research::Cheating) {
+                    if state.read().researched.contains(&Research::Cheating) {
                         tr {
                             td {"dt"}
                             td {
                                 class: "table-value",
-                                "{dt()}"
+                                "{state.read().dt}"
                             }
                         }
                     }

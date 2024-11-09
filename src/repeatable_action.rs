@@ -1,23 +1,20 @@
 #![allow(non_snake_case)]
-use std::collections::HashSet;
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
-use crate::constants::Research;
+use crate::constants::{Clicks, Research};
 
-use crate::simple_logs::SimpleLogs;
 use crate::format_decimal::format_decimal_loc;
+use crate::state::State;
 
 #[component]
 pub(crate) fn RepeatableAction(
-    mut logs: Signal<SimpleLogs>,
-    mut researched: Signal<HashSet<Research>>,
-    mut clicks: Signal<Decimal>,
-    loc: Signal<Decimal>,
+    mut state: Signal<State>,
+    clicks: Clicks,
     require: Option<Research>,
-    produced: Option<Signal<Decimal>>,
+    produced: Option<Decimal>,
     button_name: String,
     debug_message: String,
     description: String,
@@ -26,15 +23,25 @@ pub(crate) fn RepeatableAction(
 ) -> Element {
     let requirements_met = require.map_or_else(
         || true,
-        |research_name_required| researched().contains(&research_name_required)
+        |research_name_required| state.read().researched.contains(&research_name_required)
     );
+    let clicks_value = match clicks {
+        Clicks::Code => state.read().code_clicks,
+        Clicks::Debug => state.read().debug_clicks,
+        Clicks::HireInterns => state.read().interns_clicks,
+        Clicks::HireJuniorDevs => state.read().junior_devs_clicks,
+        Clicks::HireSeniorDevs => state.read().senior_devs_clicks,
+        Clicks::HireHRs => state.read().hrs_clicks,
+        Clicks::HirePMs => state.read().pms_clicks,
+        Clicks::Rmrf => state.read().rmrf_clicks,
+    };
     let new_instances = if let Some(produced) = produced {
-        produced() + clicks()
+        produced + clicks_value
     } else {
         Decimal::ZERO
     };
     let loc_cost = loc_base_cost * loc_growth_rate.pow(&new_instances);
-    let disabled = loc() < loc_cost;
+    let disabled = state.read().loc < loc_cost;
     rsx! {
         if requirements_met {
             div {
@@ -45,8 +52,17 @@ pub(crate) fn RepeatableAction(
                     disabled: disabled,
                     class: "repeatable-action-button",
                     onclick: move |_| {
-                    clicks += Decimal::new(1.0);
-                    logs.write().log(debug_message.as_str())
+                    match clicks {
+                        Clicks::Code => state.write().code_clicks += Decimal::ONE,
+                        Clicks::Debug => state.write().debug_clicks += Decimal::ONE,
+                        Clicks::HireInterns => state.write().interns_clicks += Decimal::ONE,
+                        Clicks::HireJuniorDevs => state.write().junior_devs_clicks += Decimal::ONE,
+                        Clicks::HireSeniorDevs => state.write().senior_devs_clicks += Decimal::ONE,
+                        Clicks::HireHRs => state.write().hrs_clicks += Decimal::ONE,
+                        Clicks::HirePMs => state.write().pms_clicks += Decimal::ONE,
+                        Clicks::Rmrf => state.write().rmrf_clicks += Decimal::ONE,
+                    };
+                    state.write().logs.log(debug_message.as_str())
                 }
                 , {button_name} }
             }

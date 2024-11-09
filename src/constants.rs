@@ -1,5 +1,6 @@
 use break_infinity::Decimal;
 
+#[derive(Clone, Debug)]
 pub(crate) struct GameConstants {
     // interns recruitment cost
     pub interns_loc_base_cost: Decimal,
@@ -77,6 +78,7 @@ pub(crate) struct GameConstants {
     // multipliers
     pub research_syntax_coloring_multiplier: Decimal,
     pub senior_devs_management_career_ratio: Decimal,
+    pub dt: Decimal,
 }
 
 impl Default for GameConstants {
@@ -144,6 +146,7 @@ impl Default for GameConstants {
             quest_differentiation_loc_cost: Decimal::new(1e21),
             research_syntax_coloring_multiplier: Decimal::new(2.0),
             senior_devs_management_career_ratio: Decimal::new(0.5),
+            dt: Decimal::new(0.01),
         }
     }
 }
@@ -188,4 +191,17 @@ pub(crate) enum Research {
     TextEditor,
     ToggleTheme,
     Universe,
+}
+
+#[derive(Debug,Clone,PartialEq,Eq)]
+#[repr(u8)]
+pub(crate) enum Clicks {
+    Code,
+    Debug,
+    HireInterns,
+    HireJuniorDevs,
+    HireSeniorDevs,
+    HireHRs,
+    HirePMs,
+    Rmrf,
 }

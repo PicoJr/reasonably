@@ -4,21 +4,20 @@ mod simple_logs;
 mod repeatable_action;
 mod toggle_theme_action;
 mod research_once;
-mod code_action;
-mod debug_action;
 mod format_decimal;
 mod constants;
 mod cheat_action;
 mod metrics;
 mod resources;
 mod speedrun;
+mod state;
+mod simple_action;
 
-use simple_logs::{SimpleLogs, Logs};
+use simple_logs::{Logs};
 use repeatable_action::RepeatableAction;
 use toggle_theme_action::ToggleThemeAction;
 use research_once::ResearchOnce;
 
-use std::collections::{HashSet};
 use web_time::{Instant};
 
 use break_infinity::{sum_geometric_series, Decimal};
@@ -27,14 +26,15 @@ use dioxus_logger::tracing::{info, Level};
 
 use async_std::task::sleep;
 use crate::cheat_action::CheatAction;
-use crate::code_action::CodeAction;
-use crate::constants::{GameConstants, Research};
-use crate::debug_action::DebugAction;
+use crate::constants::{Clicks, GameConstants, Research};
 use crate::metrics::Metrics;
 use crate::resources::Resources;
+use crate::simple_action::SimpleAction;
 use crate::speedrun::Speedrun;
+use crate::state::State;
 
 #[derive(Clone, Debug, PartialEq)]
+#[repr(u8)]
 enum Theme {
     LightTheme,
     DarkTheme,
@@ -62,109 +62,29 @@ fn App() -> Element {
 #[component]
 fn Home() -> Element {
     let constants = GameConstants::default();
-
-    let logs: Signal<SimpleLogs> = use_signal(SimpleLogs::new);
-    let mut researched: Signal<HashSet<Research>> = use_signal(
-        || {
-            let mut researches = HashSet::new();
-            researches.insert(Research::Cheating);
-            researches
-        }
-    );
-    let theme: Signal<Theme> = use_signal(|| Theme::LightTheme);
-    let speedrun_start: Signal<Option<Instant>> = use_signal(|| None);
-    let mut current_time: Signal<Instant> = use_signal(Instant::now);
-
-    // stats
-    let mut loc_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut bugs_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut features_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-
-    // clicks
-    let mut code_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut debug_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut interns_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut junior_devs_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut senior_devs_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut rmrf_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut hrs_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut pms_clicks: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-
-    // production per clicks
-    let loc_per_clicks: Signal<Decimal> = use_signal(|| constants.loc_per_clicks);
-    let debug_per_clicks: Signal<Decimal> = use_signal(|| constants.debug_per_clicks);
-
-    // bugs ratio
-    let manual_bugs_ratio: Signal<Decimal> = use_signal(|| constants.manual_bugs_ratio);
-    let interns_bugs_ratio: Signal<Decimal> = use_signal(|| constants.interns_bugs_ratio);
-    let junior_devs_bugs_ratio: Signal<Decimal> = use_signal(|| constants.junior_devs_bugs_ratio);
-    let senior_devs_bugs_ratio: Signal<Decimal> = use_signal(|| constants.senior_devs_bugs_ratio);
-
-    // resources
-    let mut loc: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut bugs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut features: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-
-    // producers
-    // <interns/junior/senior> recruited manually by clicking the hire <interns/junior/senior> button
-    // tracked separately in order to keep cost independent of <interns/junior/senior> recruited automatically
-    let mut manual_interns: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut manual_junior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut manual_senior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut manual_hrs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut manual_pms: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-
-    let mut interns: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut interns_loc_dt: Signal<Decimal> = use_signal(|| constants.interns_loc_dt);
-    let mut junior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let junior_devs_loc_dt: Signal<Decimal> = use_signal(|| constants.junior_devs_loc_dt);
-    let mut senior_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let senior_devs_loc_dt: Signal<Decimal> = use_signal(|| constants.senior_devs_loc_dt);
-    let mut retired_devs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let mut hrs: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let hrs_interns_dt: Signal<Decimal> = use_signal(|| constants.hrs_interns_dt);
-    let hrs_interns_quota: Signal<Decimal> = use_signal(|| constants.hrs_interns_quota);
-    let hrs_junior_devs_dt: Signal<Decimal> = use_signal(|| constants.hrs_junior_devs_dt);
-    let hrs_junior_devs_quota: Signal<Decimal> = use_signal(|| constants.hrs_junior_devs_quota);
-    let hrs_senior_devs_dt: Signal<Decimal> = use_signal(|| constants.hrs_senior_devs_dt);
-    let hrs_senior_devs_quota: Signal<Decimal> = use_signal(|| constants.hrs_senior_devs_quota);
-    let mut pms: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-    let pms_bugs_conversion_dt: Signal<Decimal> = use_signal(|| constants.pms_bugs_conversion_dt);
-
-    // promotions & retirement
-    // interns -> junior devs
-    let interns_promotion_ratio_dt: Signal<Decimal> = use_signal(|| constants.interns_promotion_ratio_dt);
-    // junior devs -> senior_devs
-    let junior_devs_promotion_ratio_dt: Signal<Decimal> = use_signal(|| constants.junior_devs_promotion_ratio_dt);
-    // senior_devs -> retired_devs
-    let mut senior_devs_retirement_ratio_dt: Signal<Decimal> = use_signal(|| constants.senior_devs_retirement_ratio_dt);
-    // senior_devs -> pms
-    let mut senior_devs_management_ratio_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
-
-    // simulation time between 2 updates
-    let mut dt: Signal<Decimal> = use_signal(|| Decimal::new(0.01));
+    let mut state: Signal<State> = use_signal(|| State::new(constants.clone()));
 
     use_future(move || async move {
         let dt_milliseconds = 100; // real time between 2 updates
         let dt_seconds = Decimal::new(1e3 / dt_milliseconds as f64);
         loop {
             // loc produced by clicking on the code button
-            let manual_loc = code_clicks() * loc_per_clicks();
+            let manual_loc = state.read().code_clicks * state.read().loc_per_clicks;
             // interns hired by clicking the hire interns button
-            let manually_hired_interns = interns_clicks();
+            let manually_hired_interns = state.read().interns_clicks;
             // junior devs hired by clicking the hire junior dev button
-            let manually_hired_junior_devs = junior_devs_clicks();
+            let manually_hired_junior_devs = state.read().junior_devs_clicks;
             // senior devs hired by clicking the hire senior dev button
-            let manually_hired_senior_devs = senior_devs_clicks();
+            let manually_hired_senior_devs = state.read().senior_devs_clicks;
             // hrs hired by clicking the hire HR button
-            let manually_hired_hrs = hrs_clicks();
+            let manually_hired_hrs = state.read().hrs_clicks;
             // pms hired by clicking the hire PM button
-            let manually_hired_pms = pms_clicks();
+            let manually_hired_pms = state.read().pms_clicks;
 
             // bugs produced as a byproduct of clicking the code button
             // subtracting bugs removed by clicking the debug button
             let manual_bugs =
-                manual_loc * manual_bugs_ratio() - debug_clicks() * debug_per_clicks();
+                manual_loc * state.read().manual_bugs_ratio - state.read().debug_clicks * state.read().debug_per_clicks;
 
             // purchases
             // must be computed before incrementing interns
@@ -172,139 +92,152 @@ fn Home() -> Element {
                 &manually_hired_interns,
                 &constants.interns_loc_base_cost,
                 &constants.interns_loc_growth_rate,
-                &manual_interns(),
+                &state.read().manual_interns,
             );
             // must be computed before incrementing junior_devs
             let manual_junior_devs_loc_cost = sum_geometric_series(
                 &manually_hired_junior_devs,
                 &constants.junior_devs_loc_base_cost,
                 &constants.junior_devs_loc_growth_rate,
-                &manual_junior_devs(),
+                &state.read().manual_junior_devs,
             );
             // must be computed before incrementing senior_devs
             let manual_senior_devs_loc_cost = sum_geometric_series(
                 &manually_hired_senior_devs,
                 &constants.senior_devs_loc_base_cost,
                 &constants.senior_devs_loc_growth_rate,
-                &manual_senior_devs(),
+                &state.read().manual_senior_devs,
             );
             // must be computed before incrementing hrs
             let manual_hrs_loc_cost = sum_geometric_series(
                 &manually_hired_hrs,
                 &constants.hrs_loc_base_cost,
                 &constants.hrs_loc_growth_rate,
-                &manual_hrs(),
+                &state.read().manual_hrs,
             );
             // must be computed before incrementing pms
             let manual_pms_loc_cost = sum_geometric_series(
                 &manually_hired_pms,
                 &constants.pms_loc_base_cost,
                 &constants.pms_loc_growth_rate,
-                &manual_pms(),
+                &state.read().manual_pms,
             );
 
             // multipliers
-            if researched().contains(&Research::SyntaxColoringMultiplierAlias) {
-                *interns_loc_dt.write() *= constants.research_syntax_coloring_multiplier;
-                researched.write().remove(&Research::SyntaxColoringMultiplierAlias);
+            if state.read().researched.contains(&Research::SyntaxColoringMultiplierAlias) {
+                state.write().interns_loc_dt *= constants.research_syntax_coloring_multiplier;
+                state.write().researched.remove(&Research::SyntaxColoringMultiplierAlias);
             }
 
-            if researched().contains(&Research::ManagementCareerAlias) {
-                let retirement_ratio_dt = senior_devs_retirement_ratio_dt();
-                *senior_devs_retirement_ratio_dt.write() = retirement_ratio_dt * (Decimal::ONE - constants.senior_devs_management_career_ratio);
-                *senior_devs_management_ratio_dt.write() = retirement_ratio_dt * constants.senior_devs_management_career_ratio;
-                researched.write().remove(&Research::ManagementCareerAlias);
+            if state.read().researched.contains(&Research::ManagementCareerAlias) {
+                let retirement_ratio_dt = state.read().senior_devs_retirement_ratio_dt;
+                state.write().senior_devs_retirement_ratio_dt = retirement_ratio_dt * (Decimal::ONE - constants.senior_devs_management_career_ratio);
+                state.write().senior_devs_management_ratio_dt = retirement_ratio_dt * constants.senior_devs_management_career_ratio;
+                state.write().researched.remove(&Research::ManagementCareerAlias);
             }
 
             // loc produced by devs
             let auto_loc = (
-                interns() * interns_loc_dt()
-                    + junior_devs() * junior_devs_loc_dt()
-                    + senior_devs() * senior_devs_loc_dt()
-            ) * dt();
+                state.read().interns * state.read().interns_loc_dt
+                    + state.read().junior_devs * state.read().junior_devs_loc_dt
+                    + state.read().senior_devs * state.read().senior_devs_loc_dt
+            ) * state.read().dt;
             // bugs produced by devs
             let auto_bugs = (
-                interns() * interns_loc_dt() * interns_bugs_ratio()
-                    + junior_devs() * junior_devs_loc_dt() * junior_devs_bugs_ratio()
-                    + senior_devs() * senior_devs_loc_dt() * senior_devs_bugs_ratio()
-            ) * dt();
+                state.read().interns * state.read().interns_loc_dt * state.read().interns_bugs_ratio
+                    + state.read().junior_devs * state.read().junior_devs_loc_dt * state.read().junior_devs_bugs_ratio
+                    + state.read().senior_devs * state.read().senior_devs_loc_dt * state.read().senior_devs_bugs_ratio
+            ) * state.read().dt;
 
-            let auto_bugs_converted_capacity = pms() * pms_bugs_conversion_dt() * dt();
+            let auto_bugs_converted_capacity = state.read().pms * state.read().pms_bugs_conversion_dt * state.read().dt;
             // make sure we do not convert more bugs than available
-            let bugs_converted = bugs().min(&auto_bugs_converted_capacity);
+            let bugs_converted = state.read().bugs.min(&auto_bugs_converted_capacity);
 
             // update loc, accounting all sources
-            loc += manual_loc + auto_loc - (
-                manual_interns_loc_cost + manual_junior_devs_loc_cost + manual_senior_devs_loc_cost + manual_hrs_loc_cost + manual_pms_loc_cost
+            state.write().loc += manual_loc + auto_loc - (
+                manual_interns_loc_cost +
+                manual_junior_devs_loc_cost +
+                manual_senior_devs_loc_cost +
+                manual_hrs_loc_cost +
+                manual_pms_loc_cost
             );
             // update live code metrics
-            *loc_dt.write() =
+            state.write().loc_dt =
                 (manual_loc + auto_loc) * dt_seconds;
 
             // update bugs, accounting for all sources
             let bugs_delta = manual_bugs + auto_bugs - bugs_converted;
-            bugs += bugs_delta;
+            state.write().bugs += bugs_delta;
             // update live code metrics
-            *bugs_dt.write() = bugs_delta * dt_seconds;
+            state.write().bugs_dt = bugs_delta * dt_seconds;
 
-            features += bugs_converted;
+            state.write().features += bugs_converted;
             // update live code metrics
-            *features_dt.write() = bugs_converted * dt_seconds;
+            state.write().features_dt = bugs_converted * dt_seconds;
 
-
-            let auto_interns = hrs() * hrs_interns_dt() * hrs_interns_quota() * dt();
-            let auto_junior_devs = hrs() * hrs_junior_devs_dt() * hrs_junior_devs_quota() * dt();
-            let auto_senior_devs = hrs() * hrs_senior_devs_dt() * hrs_senior_devs_quota() * dt();
+            let auto_interns = state.read().hrs * state.read().hrs_interns_dt * state.read().hrs_interns_quota * state.read().dt;
+            let auto_junior_devs = state.read().hrs * state.read().hrs_junior_devs_dt * state.read().hrs_junior_devs_quota * state.read().dt;
+            let auto_senior_devs = state.read().hrs * state.read().hrs_senior_devs_dt * state.read().hrs_senior_devs_quota * state.read().dt;
 
             // update manualy hired <interns/junior/senior/hr>
-            manual_interns += manually_hired_interns;
-            manual_junior_devs += manually_hired_junior_devs;
-            manual_senior_devs += manually_hired_senior_devs;
-            manual_hrs += manually_hired_hrs;
-            manual_pms += manually_hired_pms;
+            state.write().manual_interns += manually_hired_interns;
+            state.write().manual_junior_devs += manually_hired_junior_devs;
+            state.write().manual_senior_devs += manually_hired_senior_devs;
+            state.write().manual_hrs += manually_hired_hrs;
+            state.write().manual_pms += manually_hired_pms;
 
             // update interns, junior devs, senior devs count, accounting for all sources
-            interns += manually_hired_interns + auto_interns;
-            junior_devs += manually_hired_junior_devs + auto_junior_devs;
-            senior_devs += manually_hired_senior_devs + auto_senior_devs;
-            hrs += manually_hired_hrs;
-            pms += manually_hired_pms + senior_devs() * senior_devs_management_ratio_dt() * dt();
+            state.write().interns += manually_hired_interns + auto_interns;
+            state.write().junior_devs += manually_hired_junior_devs + auto_junior_devs;
+            state.write().senior_devs += manually_hired_senior_devs + auto_senior_devs;
+            state.write().hrs += manually_hired_hrs;
+            let seniors_becoming_pms = state.read().senior_devs * state.read().senior_devs_management_ratio_dt * state.read().dt;
+            state.write().pms += manually_hired_pms + seniors_becoming_pms;
 
             // handle promotions & retirement...
-            *retired_devs.write() += senior_devs() * senior_devs_retirement_ratio_dt() * dt();
-            *senior_devs.write() = senior_devs() * (Decimal::ONE - senior_devs_retirement_ratio_dt() * dt());
-            *manual_senior_devs.write() = manual_senior_devs() * (Decimal::ONE - senior_devs_retirement_ratio_dt() * dt());
+            let retired_seniors = state.read().senior_devs * state.read().senior_devs_retirement_ratio_dt * state.read().dt;
+            state.write().retired_devs += retired_seniors;
+            let remaining_seniors = state.read().senior_devs * (Decimal::ONE - state.read().senior_devs_retirement_ratio_dt * state.read().dt);
+            state.write().senior_devs = remaining_seniors;
+            let remaining_manual_seniors =state.read().manual_senior_devs * (Decimal::ONE - state.read().senior_devs_retirement_ratio_dt * state.read().dt);
+            state.write().manual_senior_devs = remaining_manual_seniors;
 
-            if researched().contains(&Research::JuniorDevsPromotion) {
-                *senior_devs.write() += junior_devs() * junior_devs_promotion_ratio_dt() * dt();
-                *junior_devs.write() = junior_devs() * (Decimal::ONE - junior_devs_promotion_ratio_dt() * dt());
-                *manual_junior_devs.write() = manual_junior_devs() * (Decimal::ONE - junior_devs_promotion_ratio_dt() * dt());
+            if state.read().researched.contains(&Research::JuniorDevsPromotion) {
+                let juniors_promoted_to_seniors = state.read().junior_devs * state.read().junior_devs_promotion_ratio_dt * state.read().dt;
+                state.write().senior_devs += juniors_promoted_to_seniors;
+                let remaining_juniors = state.read().junior_devs * (Decimal::ONE - state.read().junior_devs_promotion_ratio_dt * state.read().dt);
+                state.write().junior_devs = remaining_juniors;
+                let remaining_manual_juniors = state.read().manual_junior_devs * (Decimal::ONE - state.read().junior_devs_promotion_ratio_dt * state.read().dt);
+                state.write().manual_junior_devs = remaining_manual_juniors;
             }
 
-            if researched().contains(&Research::InternsPromotion) {
-                *junior_devs.write() += interns() * interns_promotion_ratio_dt() * dt();
-                *interns.write() = interns() * (Decimal::ONE - interns_promotion_ratio_dt() * dt());
-                *manual_interns.write() = manual_interns() * (Decimal::ONE - interns_promotion_ratio_dt() * dt());
+            if state.read().researched.contains(&Research::InternsPromotion) {
+                let interns_promoted_juniors = state.read().interns * state.read().interns_promotion_ratio_dt * state.read().dt;
+                state.write().junior_devs += interns_promoted_juniors;
+                let remaining_interns = state.read().interns * (Decimal::ONE - state.read().interns_promotion_ratio_dt * state.read().dt);
+                state.write().interns = remaining_interns;
+                let remaining_manual_interns = state.read().manual_interns * (Decimal::ONE - state.read().interns_promotion_ratio_dt * state.read().dt);
+                state.write().manual_interns = remaining_manual_interns;
             }
 
             // handle rm -rf
-            if rmrf_clicks() > Decimal::ZERO {
-                *loc.write() = Decimal::ZERO;
-                *bugs.write() = Decimal::ZERO;
+            if state.read().rmrf_clicks > Decimal::ZERO {
+                state.write().loc = Decimal::ZERO;
+                state.write().bugs = Decimal::ZERO;
             }
 
             // reset clicks, now that all clicks have been taken into account
-            *code_clicks.write() = Decimal::ZERO;
-            *debug_clicks.write() = Decimal::ZERO;
-            *interns_clicks.write() = Decimal::ZERO;
-            *junior_devs_clicks.write() = Decimal::ZERO;
-            *senior_devs_clicks.write() = Decimal::ZERO;
-            *hrs_clicks.write() = Decimal::ZERO;
-            *pms_clicks.write() = Decimal::ZERO;
-            *rmrf_clicks.write() = Decimal::ZERO;
+            state.write().code_clicks = Decimal::ZERO;
+            state.write().debug_clicks = Decimal::ZERO;
+            state.write().interns_clicks = Decimal::ZERO;
+            state.write().junior_devs_clicks = Decimal::ZERO;
+            state.write().senior_devs_clicks = Decimal::ZERO;
+            state.write().hrs_clicks = Decimal::ZERO;
+            state.write().pms_clicks = Decimal::ZERO;
+            state.write().rmrf_clicks = Decimal::ZERO;
 
             // update current time
-            *current_time.write() = Instant::now();
+            state.write().current_time = Instant::now();
 
             // sleep before next tick
             sleep(std::time::Duration::from_millis(dt_milliseconds)).await;
@@ -330,9 +263,7 @@ fn Home() -> Element {
     ].into_iter().map(|(research_name, button_name, description, loc_cost, require, alias)|
          rsx! {
             ResearchOnce{
-                logs: logs,
-                researched: researched,
-                loc: loc,
+                state: state,
                 require: require,
                 research_name: research_name.clone(),
                 research_alias: alias,
@@ -366,9 +297,7 @@ fn Home() -> Element {
     ].into_iter().map(|(name, button_name, description, require, loc_cost)|
         rsx! {
             ResearchOnce{
-                logs: logs,
-                researched: researched,
-                loc: loc,
+                state: state,
                 require: require,
                 research_name: name,
                 button_name: button_name,
@@ -381,19 +310,17 @@ fn Home() -> Element {
     );
 
     let repeatable_actions_rendered = vec![
-        ("hire intern", "Produces loc, and bugs", interns_clicks, Some(manual_interns), constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some(Research::Internship)),
-        ("hire junior dev", "Produces loc, and bugs", junior_devs_clicks, Some(manual_junior_devs), constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some(Research::JuniorDevsPosition)),
-        ("hire senior dev", "Produces loc, and bugs", senior_devs_clicks, Some(manual_senior_devs), constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some(Research::SeniorDevsPosition)),
-        ("hire HR", "Hire devs", hrs_clicks, Some(manual_hrs), constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some(Research::HumanResources)),
-        ("hire PM", "Convert bugs to features", pms_clicks, Some(manual_pms), constants.pms_loc_base_cost, constants.pms_loc_growth_rate, Some(Research::ProjectManagement)),
-        ("rm -rf", "Wipe out all loc and bugs", rmrf_clicks, None, Decimal::ZERO, Decimal::ONE, Some(Research::Rmrf)),
+        ("hire intern", "Produces loc, and bugs", Clicks::HireInterns, Some(state.read().manual_interns), constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some(Research::Internship)),
+        ("hire junior dev", "Produces loc, and bugs", Clicks::HireJuniorDevs, Some(state.read().manual_junior_devs), constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some(Research::JuniorDevsPosition)),
+        ("hire senior dev", "Produces loc, and bugs", Clicks::HireSeniorDevs, Some(state.read().manual_senior_devs), constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some(Research::SeniorDevsPosition)),
+        ("hire HR", "Hire devs", Clicks::HireHRs, Some(state.read().manual_hrs), constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some(Research::HumanResources)),
+        ("hire PM", "Convert bugs to features", Clicks::HirePMs, Some(state.read().manual_pms), constants.pms_loc_base_cost, constants.pms_loc_growth_rate, Some(Research::ProjectManagement)),
+        ("rm -rf", "Wipe out all loc and bugs", Clicks::Rmrf, None, Decimal::ZERO, Decimal::ONE, Some(Research::Rmrf)),
     ].into_iter().map(|(button_name, description, clicks, produced, loc_base_cost, loc_growth_rate, require)|
         rsx! {
             RepeatableAction{
-                logs: logs,
-                researched: researched,
+                state: state,
                 clicks: clicks,
-                loc: loc,
                 require: require,
                 produced: produced,
                 button_name: button_name,
@@ -409,35 +336,20 @@ fn Home() -> Element {
         div { // vertical
             class: "everything",
             Logs {
-                researched: researched,
-                logs: logs,
+                state: state,
             }
             div { // vertical
                 class: "metrics",
                 Speedrun {
-                    researched: researched,
-                    loc: loc,
-                    speedrun_start: speedrun_start,
-                    current_time: current_time,
+                    state: state,
                     max_loc: constants.quest_differentiation_loc_cost,
                 }
                 Metrics {
-                    researched: researched,
-                    loc_dt: loc_dt,
-                    bugs_dt: bugs_dt,
-                    dt: dt,
-                    features_dt: features_dt,
+                    state: state,
                 }
-                if loc() > Decimal::ZERO {
+                if state.read().loc > Decimal::ZERO {
                     Resources {
-                        loc: loc,
-                        bugs: bugs,
-                        interns: interns,
-                        junior_devs: junior_devs,
-                        senior_devs: senior_devs,
-                        retired_devs: retired_devs,
-                        hrs: hrs,
-                        pms: pms,
+                        state: state,
                     }
                 }
             }
@@ -445,62 +357,61 @@ fn Home() -> Element {
                 class: "interactions",
                 div { // vertical
                     class: "repeatable-actions",
-                    CodeAction{
-                        logs,
-                        code_clicks,
-                        speedrun_start: speedrun_start,
+                    SimpleAction {
+                        state: state,
+                        clicks: Clicks::Code,
+                        button_name: "code",
                     }
-                    if bugs() > Decimal::ZERO {
-                        DebugAction {
-                            logs,
-                            debug_clicks,
+                    if state.read().bugs > Decimal::ZERO {
+                        SimpleAction {
+                            state: state,
+                            clicks: Clicks::Debug,
+                            button_name: "debug",
                         }
                     }
                     ToggleThemeAction {
-                        logs: logs,
-                        researched: researched,
-                        theme: theme,
+                        state: state,
                     }
                     {repeatable_actions_rendered}
-                    if researched().contains(&Research::Cheating) {
+                    if state.read().researched.contains(&Research::Cheating) {
                         CheatAction{
-                            logs: logs,
-                            value: loc,
+                            state: state,
+                            clicks: Clicks::Code,
                             button_name: "cheat loc",
                             debug_message: "cheating loc...",
                         }
                         CheatAction{
-                            logs: logs,
-                            value: bugs,
+                            state: state,
+                            clicks: Clicks::Debug,
                             button_name: "cheat bugs",
                             debug_message: "cheating bugs...",
                         }
                         CheatAction{
-                            logs: logs,
-                            value: interns,
+                            state: state,
+                            clicks: Clicks::HireInterns,
                             button_name: "cheat interns",
                             debug_message: "cheating interns...",
                         }
                         CheatAction{
-                            logs: logs,
-                            value: junior_devs,
+                            state: state,
+                            clicks: Clicks::HireJuniorDevs,
                             button_name: "cheat junior devs",
                             debug_message: "cheating junior devs...",
                         }
                         CheatAction{
-                            logs: logs,
-                            value: senior_devs,
+                            state: state,
+                            clicks: Clicks::HireSeniorDevs,
                             button_name: "cheat senior devs",
                             debug_message: "cheating senior devs...",
                         }
                         button {
                             onclick: move |_| {
-                                dt *= Decimal::new(2.0);
+                                state.write().dt *= Decimal::new(2.0);
                         }
                         , {"cheat time faster"} }
                         button {
                             onclick: move |_| {
-                                dt /= Decimal::new(2.0);
+                                state.write().dt /= Decimal::new(2.0);
                         }
                         , {"cheat time slower"} }
                     }

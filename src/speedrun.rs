@@ -1,6 +1,4 @@
 #![allow(non_snake_case)]
-use std::collections::HashSet;
-use web_time::{Instant};
 
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
@@ -8,18 +6,16 @@ use dioxus::dioxus_core::Element;
 use dioxus::prelude::{Signal};
 use dioxus::prelude::*;
 use crate::constants::Research;
+use crate::state::State;
 
 #[component]
 pub(crate) fn Speedrun(
-    researched: Signal<HashSet<Research>>,
-    loc: Signal<Decimal>,
-    speedrun_start: Signal<Option<Instant>>,
-    current_time: Signal<Instant>,
+    state: Signal<State>,
     max_loc: Decimal,
 ) -> Element {
-    let progress = (loc().max(&Decimal::ONE).log10() / max_loc.max(&Decimal::ONE).log10()).clamp(0.0, 1.0);
-    let elapsed_time = if let Some(start) = speedrun_start() {
-        let duration = current_time() - start;
+    let progress = (state.read().loc.max(&Decimal::ONE).log10() / max_loc.max(&Decimal::ONE).log10()).clamp(0.0, 1.0);
+    let elapsed_time = if let Some(start) = state.read().speedrun_start {
+        let duration = state.read().current_time - start;
         let millis = duration.as_millis();
         let hundredth = (millis / 10u128) % 100u128;
         let seconds = (millis / 1000u128) % 60u128;
@@ -30,7 +26,7 @@ pub(crate) fn Speedrun(
         "timer not started".to_string()
     };
     rsx! {
-        if researched().contains(&Research::Speedrun) {
+        if state.read().researched.contains(&Research::Speedrun) {
             div {
                 class: "speedrun",
                 table {
