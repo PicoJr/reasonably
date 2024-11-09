@@ -30,6 +30,7 @@ pub(crate) struct GameConstants {
     pub research_rmrf_loc_cost: Decimal,
     pub research_toggle_theme_loc_cost: Decimal,
     pub research_syntax_coloring_multiplier_loc_cost: Decimal,
+    pub research_management_career_loc_cost: Decimal,
     // initial promotion ratio
     pub interns_promotion_ratio_dt: Decimal,
     pub junior_devs_promotion_ratio_dt: Decimal,
@@ -75,6 +76,7 @@ pub(crate) struct GameConstants {
     pub quest_differentiation_loc_cost: Decimal,
     // multipliers
     pub research_syntax_coloring_multiplier: Decimal,
+    pub senior_devs_management_career_ratio: Decimal,
 }
 
 impl Default for GameConstants {
@@ -103,6 +105,7 @@ impl Default for GameConstants {
             research_rmrf_loc_cost: Decimal::new(1.0),
             research_toggle_theme_loc_cost: Decimal::new(1.0),
             research_syntax_coloring_multiplier_loc_cost: Decimal::new(1.0),
+            research_management_career_loc_cost: Decimal::new(1.0),
             interns_promotion_ratio_dt: Decimal::new(0.04),
             junior_devs_promotion_ratio_dt: Decimal::new(0.02),
             senior_devs_retirement_ratio_dt: Decimal::new(0.01),
@@ -140,6 +143,7 @@ impl Default for GameConstants {
             quest_universe_loc_cost: Decimal::new(1e18),
             quest_differentiation_loc_cost: Decimal::new(1e21),
             research_syntax_coloring_multiplier: Decimal::new(2.0),
+            senior_devs_management_career_ratio: Decimal::new(0.5),
         }
     }
 }
@@ -170,6 +174,8 @@ pub(crate) enum Research {
     JuniorDevsPromotion,
     Kernel,
     Logs,
+    ManagementCareer,
+    ManagementCareerAlias,
     Mouse,
     PhysicsEngine,
     ProjectManagement,

@@ -137,7 +137,9 @@ fn Home() -> Element {
     // junior devs -> senior_devs
     let junior_devs_promotion_ratio_dt: Signal<Decimal> = use_signal(|| constants.junior_devs_promotion_ratio_dt);
     // senior_devs -> retired_devs
-    let senior_devs_retirement_ratio_dt: Signal<Decimal> = use_signal(|| constants.senior_devs_retirement_ratio_dt);
+    let mut senior_devs_retirement_ratio_dt: Signal<Decimal> = use_signal(|| constants.senior_devs_retirement_ratio_dt);
+    // senior_devs -> pms
+    let mut senior_devs_management_ratio_dt: Signal<Decimal> = use_signal(|| Decimal::ZERO);
 
     // simulation time between 2 updates
     let mut dt: Signal<Decimal> = use_signal(|| Decimal::new(0.01));
@@ -207,6 +209,13 @@ fn Home() -> Element {
                 researched.write().remove(&Research::SyntaxColoringMultiplierAlias);
             }
 
+            if researched().contains(&Research::ManagementCareerAlias) {
+                let retirement_ratio_dt = senior_devs_retirement_ratio_dt();
+                *senior_devs_retirement_ratio_dt.write() = retirement_ratio_dt * (Decimal::ONE - constants.senior_devs_management_career_ratio);
+                *senior_devs_management_ratio_dt.write() = retirement_ratio_dt * constants.senior_devs_management_career_ratio;
+                researched.write().remove(&Research::ManagementCareerAlias);
+            }
+
             // loc produced by devs
             let auto_loc = (
                 interns() * interns_loc_dt()
@@ -233,14 +242,14 @@ fn Home() -> Element {
                 (manual_loc + auto_loc) * dt_seconds;
 
             // update bugs, accounting for all sources
-            bugs += manual_bugs + auto_bugs - bugs_converted;
+            let bugs_delta = manual_bugs + auto_bugs - bugs_converted;
+            bugs += bugs_delta;
             // update live code metrics
-            *bugs_dt.write() =
-                (manual_bugs + auto_bugs) * dt_seconds;
+            *bugs_dt.write() = bugs_delta * dt_seconds;
 
             features += bugs_converted;
             // update live code metrics
-            *features_dt.write() = features * dt_seconds;
+            *features_dt.write() = bugs_converted * dt_seconds;
 
 
             let auto_interns = hrs() * hrs_interns_dt() * hrs_interns_quota() * dt();
@@ -252,13 +261,14 @@ fn Home() -> Element {
             manual_junior_devs += manually_hired_junior_devs;
             manual_senior_devs += manually_hired_senior_devs;
             manual_hrs += manually_hired_hrs;
+            manual_pms += manually_hired_pms;
 
             // update interns, junior devs, senior devs count, accounting for all sources
             interns += manually_hired_interns + auto_interns;
             junior_devs += manually_hired_junior_devs + auto_junior_devs;
             senior_devs += manually_hired_senior_devs + auto_senior_devs;
             hrs += manually_hired_hrs;
-            pms += manually_hired_pms;
+            pms += manually_hired_pms + senior_devs() * senior_devs_management_ratio_dt() * dt();
 
             // handle promotions & retirement...
             *retired_devs.write() += senior_devs() * senior_devs_retirement_ratio_dt() * dt();
@@ -316,6 +326,7 @@ fn Home() -> Element {
         (Research::SyntaxColoringMultiplier, "install syntax coloring", "Boost interns loc/s x2", constants.research_syntax_coloring_multiplier_loc_cost, None, Some(Research::SyntaxColoringMultiplierAlias)),
         (Research::HumanResources, "research human resources", "Allow hiring HR, who hire devs", constants.research_human_resources_loc_cost, Some(Research::SeniorDevsPosition), None),
         (Research::ProjectManagement, "research project management", "Allow hiring PMs, who convert bugs to features", constants.research_project_management_loc_cost, Some(Research::HumanResources), None),
+        (Research::ManagementCareer, "research management career", "Instead of retiring, some senior devs will become PMs", constants.research_management_career_loc_cost, Some(Research::ProjectManagement), Some(Research::ManagementCareerAlias)),
     ].into_iter().map(|(research_name, button_name, description, loc_cost, require, alias)|
          rsx! {
             ResearchOnce{
