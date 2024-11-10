@@ -44,30 +44,30 @@ pub(crate) fn Resources(
                         }
                     }
                 }
-                if state.read().interns > Decimal::ZERO {
+                if (state.read().interns + state.read().manual_interns) > Decimal::ZERO {
                     tr {
                         td {"Interns"}
                         td {
                             class: "table-value",
-                            "{format_decimal_devs(state.read().interns)}"
+                            "{format_decimal_devs(state.read().interns + state.read().manual_interns)}"
                         }
                     }
                 }
-                if state.read().junior_devs > Decimal::ZERO {
+                if (state.read().junior_devs + state.read().manual_junior_devs) > Decimal::ZERO {
                     tr {
                         td {"Junior devs"}
                         td {
                             class: "table-value",
-                            "{format_decimal_devs(state.read().junior_devs)}"
+                            "{format_decimal_devs(state.read().junior_devs + state.read().manual_junior_devs)}"
                         }
                     }
                 }
-                if state.read().senior_devs > Decimal::ZERO {
+                if (state.read().senior_devs + state.read().manual_senior_devs) > Decimal::ZERO {
                     tr {
                         td{"Senior devs"}
                         td{
                             class: "table-value",
-                            "{format_decimal_devs(state.read().senior_devs)}"
+                            "{format_decimal_devs(state.read().senior_devs + state.read().manual_senior_devs)}"
                         }
                     }
                 }
@@ -80,21 +80,21 @@ pub(crate) fn Resources(
                         }
                     }
                 }
-                if state.read().hrs > Decimal::ZERO {
+                if (state.read().hrs + state.read().manual_hrs) > Decimal::ZERO {
                     tr {
                         td{"HRs"}
                         td{
                             class: "table-value",
-                            "{format_decimal_hrs(state.read().hrs)}"
+                            "{format_decimal_hrs(state.read().hrs + state.read().manual_hrs)}"
                         }
                     }
                 }
-                if state.read().pms > Decimal::ZERO {
+                if (state.read().pms + state.read().manual_pms) > Decimal::ZERO {
                     tr {
                         td{"PMs"}
                         td{
                             class: "table-value",
-                            "{format_decimal_pms(state.read().pms)}"
+                            "{format_decimal_pms(state.read().pms + state.read().manual_pms)}"
                         }
                     }
                 }

@@ -26,7 +26,7 @@ use dioxus_logger::tracing::{info, Level};
 
 use async_std::task::sleep;
 use crate::cheat_action::CheatAction;
-use crate::constants::{Clicks, GameConstants, Research};
+use crate::constants::{GameConstants, Research};
 use crate::metrics::Metrics;
 use crate::resources::Resources;
 use crate::simple_action::SimpleAction;
@@ -68,60 +68,6 @@ fn Home() -> Element {
         let dt_milliseconds = 100; // real time between 2 updates
         let dt_seconds = Decimal::new(1e3 / dt_milliseconds as f64);
         loop {
-            // loc produced by clicking on the code button
-            let manual_loc = state.read().code_clicks * state.read().loc_per_clicks;
-            // interns hired by clicking the hire interns button
-            let manually_hired_interns = state.read().interns_clicks;
-            // junior devs hired by clicking the hire junior dev button
-            let manually_hired_junior_devs = state.read().junior_devs_clicks;
-            // senior devs hired by clicking the hire senior dev button
-            let manually_hired_senior_devs = state.read().senior_devs_clicks;
-            // hrs hired by clicking the hire HR button
-            let manually_hired_hrs = state.read().hrs_clicks;
-            // pms hired by clicking the hire PM button
-            let manually_hired_pms = state.read().pms_clicks;
-
-            // bugs produced as a byproduct of clicking the code button
-            // subtracting bugs removed by clicking the debug button
-            let manual_bugs =
-                manual_loc * state.read().manual_bugs_ratio - state.read().debug_clicks * state.read().debug_per_clicks;
-
-            // purchases
-            // must be computed before incrementing interns
-            let manual_interns_loc_cost = sum_geometric_series(
-                &manually_hired_interns,
-                &constants.interns_loc_base_cost,
-                &constants.interns_loc_growth_rate,
-                &state.read().manual_interns,
-            );
-            // must be computed before incrementing junior_devs
-            let manual_junior_devs_loc_cost = sum_geometric_series(
-                &manually_hired_junior_devs,
-                &constants.junior_devs_loc_base_cost,
-                &constants.junior_devs_loc_growth_rate,
-                &state.read().manual_junior_devs,
-            );
-            // must be computed before incrementing senior_devs
-            let manual_senior_devs_loc_cost = sum_geometric_series(
-                &manually_hired_senior_devs,
-                &constants.senior_devs_loc_base_cost,
-                &constants.senior_devs_loc_growth_rate,
-                &state.read().manual_senior_devs,
-            );
-            // must be computed before incrementing hrs
-            let manual_hrs_loc_cost = sum_geometric_series(
-                &manually_hired_hrs,
-                &constants.hrs_loc_base_cost,
-                &constants.hrs_loc_growth_rate,
-                &state.read().manual_hrs,
-            );
-            // must be computed before incrementing pms
-            let manual_pms_loc_cost = sum_geometric_series(
-                &manually_hired_pms,
-                &constants.pms_loc_base_cost,
-                &constants.pms_loc_growth_rate,
-                &state.read().manual_pms,
-            );
 
             // multipliers
             if state.read().researched.contains(&Research::SyntaxColoringMultiplierAlias) {
@@ -138,64 +84,45 @@ fn Home() -> Element {
 
             // loc produced by devs
             let auto_loc = (
-                state.read().interns * state.read().interns_loc_dt
-                    + state.read().junior_devs * state.read().junior_devs_loc_dt
-                    + state.read().senior_devs * state.read().senior_devs_loc_dt
+                (state.read().interns + state.read().manual_interns) * state.read().interns_loc_dt
+                    + (state.read().junior_devs + state.read().manual_junior_devs) * state.read().junior_devs_loc_dt
+                    + (state.read().senior_devs + state.read().manual_senior_devs) * state.read().senior_devs_loc_dt
             ) * state.read().dt;
             // bugs produced by devs
             let auto_bugs = (
-                state.read().interns * state.read().interns_loc_dt * state.read().interns_bugs_ratio
-                    + state.read().junior_devs * state.read().junior_devs_loc_dt * state.read().junior_devs_bugs_ratio
-                    + state.read().senior_devs * state.read().senior_devs_loc_dt * state.read().senior_devs_bugs_ratio
+                (state.read().interns + state.read().manual_interns) * state.read().interns_loc_dt * state.read().interns_bugs_ratio
+                    + (state.read().junior_devs + state.read().manual_junior_devs) * state.read().junior_devs_loc_dt * state.read().junior_devs_bugs_ratio
+                    + (state.read().senior_devs + state.read().manual_senior_devs) * state.read().senior_devs_loc_dt * state.read().senior_devs_bugs_ratio
             ) * state.read().dt;
 
-            let auto_bugs_converted_capacity = state.read().pms * state.read().pms_bugs_conversion_dt * state.read().dt;
+            // update loc, accounting all sources
+            state.write().loc += auto_loc;
+            // update live code metrics
+            state.write().loc_dt = auto_loc * dt_seconds;
+
+            let auto_bugs_converted_capacity = (state.read().pms + state.read().manual_pms) * state.read().pms_bugs_conversion_dt * state.read().dt;
             // make sure we do not convert more bugs than available
             let bugs_converted = state.read().bugs.min(&auto_bugs_converted_capacity);
-
-            // update loc, accounting all sources
-            state.write().loc += manual_loc + auto_loc - (
-                manual_interns_loc_cost +
-                manual_junior_devs_loc_cost +
-                manual_senior_devs_loc_cost +
-                manual_hrs_loc_cost +
-                manual_pms_loc_cost
-            );
-            // update live code metrics
-            state.write().loc_dt =
-                (manual_loc + auto_loc) * dt_seconds;
-
-            // update bugs, accounting for all sources
-            let bugs_delta = manual_bugs + auto_bugs - bugs_converted;
+            let bugs_delta = auto_bugs - bugs_converted;
             state.write().bugs += bugs_delta;
-            // update live code metrics
             state.write().bugs_dt = bugs_delta * dt_seconds;
 
             state.write().features += bugs_converted;
-            // update live code metrics
             state.write().features_dt = bugs_converted * dt_seconds;
 
-            let auto_interns = state.read().hrs * state.read().hrs_interns_dt * state.read().hrs_interns_quota * state.read().dt;
-            let auto_junior_devs = state.read().hrs * state.read().hrs_junior_devs_dt * state.read().hrs_junior_devs_quota * state.read().dt;
-            let auto_senior_devs = state.read().hrs * state.read().hrs_senior_devs_dt * state.read().hrs_senior_devs_quota * state.read().dt;
-
-            // update manualy hired <interns/junior/senior/hr>
-            state.write().manual_interns += manually_hired_interns;
-            state.write().manual_junior_devs += manually_hired_junior_devs;
-            state.write().manual_senior_devs += manually_hired_senior_devs;
-            state.write().manual_hrs += manually_hired_hrs;
-            state.write().manual_pms += manually_hired_pms;
+            let auto_interns = (state.read().hrs + state.read().manual_hrs) * state.read().hrs_interns_dt * state.read().hrs_interns_quota * state.read().dt;
+            let auto_junior_devs = (state.read().hrs + state.read().manual_hrs) * state.read().hrs_junior_devs_dt * state.read().hrs_junior_devs_quota * state.read().dt;
+            let auto_senior_devs = (state.read().hrs + state.read().manual_hrs) * state.read().hrs_senior_devs_dt * state.read().hrs_senior_devs_quota * state.read().dt;
 
             // update interns, junior devs, senior devs count, accounting for all sources
-            state.write().interns += manually_hired_interns + auto_interns;
-            state.write().junior_devs += manually_hired_junior_devs + auto_junior_devs;
-            state.write().senior_devs += manually_hired_senior_devs + auto_senior_devs;
-            state.write().hrs += manually_hired_hrs;
-            let seniors_becoming_pms = state.read().senior_devs * state.read().senior_devs_management_ratio_dt * state.read().dt;
-            state.write().pms += manually_hired_pms + seniors_becoming_pms;
+            state.write().interns += auto_interns;
+            state.write().junior_devs += auto_junior_devs;
+            state.write().senior_devs += auto_senior_devs;
+            let seniors_becoming_pms = (state.read().senior_devs + state.read().manual_senior_devs) * state.read().senior_devs_management_ratio_dt * state.read().dt;
+            state.write().pms += seniors_becoming_pms;
 
             // handle promotions & retirement...
-            let retired_seniors = state.read().senior_devs * state.read().senior_devs_retirement_ratio_dt * state.read().dt;
+            let retired_seniors = (state.read().senior_devs + state.read().manual_senior_devs) * state.read().senior_devs_retirement_ratio_dt * state.read().dt;
             state.write().retired_devs += retired_seniors;
             let remaining_seniors = state.read().senior_devs * (Decimal::ONE - state.read().senior_devs_retirement_ratio_dt * state.read().dt);
             state.write().senior_devs = remaining_seniors;
@@ -203,7 +130,7 @@ fn Home() -> Element {
             state.write().manual_senior_devs = remaining_manual_seniors;
 
             if state.read().researched.contains(&Research::JuniorDevsPromotion) {
-                let juniors_promoted_to_seniors = state.read().junior_devs * state.read().junior_devs_promotion_ratio_dt * state.read().dt;
+                let juniors_promoted_to_seniors = (state.read().junior_devs + state.read().manual_junior_devs) * state.read().junior_devs_promotion_ratio_dt * state.read().dt;
                 state.write().senior_devs += juniors_promoted_to_seniors;
                 let remaining_juniors = state.read().junior_devs * (Decimal::ONE - state.read().junior_devs_promotion_ratio_dt * state.read().dt);
                 state.write().junior_devs = remaining_juniors;
@@ -212,29 +139,13 @@ fn Home() -> Element {
             }
 
             if state.read().researched.contains(&Research::InternsPromotion) {
-                let interns_promoted_juniors = state.read().interns * state.read().interns_promotion_ratio_dt * state.read().dt;
+                let interns_promoted_juniors = (state.read().interns + state.read().manual_interns) * state.read().interns_promotion_ratio_dt * state.read().dt;
                 state.write().junior_devs += interns_promoted_juniors;
                 let remaining_interns = state.read().interns * (Decimal::ONE - state.read().interns_promotion_ratio_dt * state.read().dt);
                 state.write().interns = remaining_interns;
                 let remaining_manual_interns = state.read().manual_interns * (Decimal::ONE - state.read().interns_promotion_ratio_dt * state.read().dt);
                 state.write().manual_interns = remaining_manual_interns;
             }
-
-            // handle rm -rf
-            if state.read().rmrf_clicks > Decimal::ZERO {
-                state.write().loc = Decimal::ZERO;
-                state.write().bugs = Decimal::ZERO;
-            }
-
-            // reset clicks, now that all clicks have been taken into account
-            state.write().code_clicks = Decimal::ZERO;
-            state.write().debug_clicks = Decimal::ZERO;
-            state.write().interns_clicks = Decimal::ZERO;
-            state.write().junior_devs_clicks = Decimal::ZERO;
-            state.write().senior_devs_clicks = Decimal::ZERO;
-            state.write().hrs_clicks = Decimal::ZERO;
-            state.write().pms_clicks = Decimal::ZERO;
-            state.write().rmrf_clicks = Decimal::ZERO;
 
             // update current time
             state.write().current_time = Instant::now();
@@ -309,29 +220,6 @@ fn Home() -> Element {
         }
     );
 
-    let repeatable_actions_rendered = vec![
-        ("hire intern", "Produces loc, and bugs", Clicks::HireInterns, Some(state.read().manual_interns), constants.interns_loc_base_cost, constants.interns_loc_growth_rate, Some(Research::Internship)),
-        ("hire junior dev", "Produces loc, and bugs", Clicks::HireJuniorDevs, Some(state.read().manual_junior_devs), constants.junior_devs_loc_base_cost, constants.junior_devs_loc_growth_rate, Some(Research::JuniorDevsPosition)),
-        ("hire senior dev", "Produces loc, and bugs", Clicks::HireSeniorDevs, Some(state.read().manual_senior_devs), constants.senior_devs_loc_base_cost, constants.senior_devs_loc_growth_rate, Some(Research::SeniorDevsPosition)),
-        ("hire HR", "Hire devs", Clicks::HireHRs, Some(state.read().manual_hrs), constants.hrs_loc_base_cost, constants.hrs_loc_growth_rate, Some(Research::HumanResources)),
-        ("hire PM", "Convert bugs to features", Clicks::HirePMs, Some(state.read().manual_pms), constants.pms_loc_base_cost, constants.pms_loc_growth_rate, Some(Research::ProjectManagement)),
-        ("rm -rf", "Wipe out all loc and bugs", Clicks::Rmrf, None, Decimal::ZERO, Decimal::ONE, Some(Research::Rmrf)),
-    ].into_iter().map(|(button_name, description, clicks, produced, loc_base_cost, loc_growth_rate, require)|
-        rsx! {
-            RepeatableAction{
-                state: state,
-                clicks: clicks,
-                require: require,
-                produced: produced,
-                button_name: button_name,
-                debug_message: button_name,
-                description: description,
-                loc_base_cost: loc_base_cost,
-                loc_growth_rate: loc_growth_rate,
-            }
-        }
-    );
-
     rsx! {
         div { // vertical
             class: "everything",
@@ -361,7 +249,10 @@ fn Home() -> Element {
                         state: state,
                         button_name: "code",
                         action: move |mut s: Signal<State>| {
-                            s.write().loc += Decimal::new(1.0)
+                            let loc_added = state.read().loc_per_clicks;
+                            let bugs_added = loc_added * state.read().manual_bugs_ratio;
+                            s.write().loc += loc_added;
+                            s.write().bugs += bugs_added;
                         },
                     }
                     if state.read().bugs > Decimal::ZERO {
@@ -369,14 +260,128 @@ fn Home() -> Element {
                             state: state,
                             button_name: "debug",
                             action: move |mut s: Signal<State>| {
-                                s.write().bugs -= Decimal::new(1.0)
+                                let bugs_removed = state.read().debug_per_clicks;
+                                s.write().bugs -= bugs_removed;
                             },
                         }
                     }
                     ToggleThemeAction {
                         state: state,
                     }
-                    {repeatable_actions_rendered}
+                    RepeatableAction{
+                        state: state,
+                        require: Some(Research::Internship),
+                        produced: Some(state.read().manual_interns),
+                        button_name: "hire intern",
+                        debug_message: "hire intern",
+                        description: "Produces loc, and bugs",
+                        loc_base_cost: constants.interns_loc_base_cost,
+                        loc_growth_rate: constants.interns_loc_growth_rate,
+                        action: move |mut s: Signal<State>| {
+                            s.write().manual_interns += Decimal::ONE;
+                            let manual_interns_loc_cost = sum_geometric_series(
+                                &Decimal::ONE,
+                                &constants.interns_loc_base_cost,
+                                &constants.interns_loc_growth_rate,
+                                &state.read().manual_interns,
+                            );
+                            s.write().loc -= manual_interns_loc_cost;
+                        },
+                    }
+                    RepeatableAction{
+                        state: state,
+                        require: Some(Research::JuniorDevsPosition),
+                        produced: Some(state.read().manual_junior_devs),
+                        button_name: "hire junior devs",
+                        debug_message: "hire junior devs",
+                        description: "Produces loc, and bugs",
+                        loc_base_cost: constants.junior_devs_loc_base_cost,
+                        loc_growth_rate: constants.junior_devs_loc_growth_rate,
+                        action: move |mut s: Signal<State>| {
+                            s.write().manual_junior_devs += Decimal::ONE;
+                            let manual_junior_devs_loc_cost = sum_geometric_series(
+                                &Decimal::ONE,
+                                &constants.junior_devs_loc_base_cost,
+                                &constants.junior_devs_loc_growth_rate,
+                                &state.read().manual_junior_devs,
+                            );
+                            s.write().loc -= manual_junior_devs_loc_cost;
+                        },
+                    }
+                    RepeatableAction{
+                        state: state,
+                        require: Some(Research::SeniorDevsPosition),
+                        produced: Some(state.read().manual_senior_devs),
+                        button_name: "hire senior devs",
+                        debug_message: "hire senior devs",
+                        description: "Produces loc, and bugs",
+                        loc_base_cost: constants.senior_devs_loc_base_cost,
+                        loc_growth_rate: constants.senior_devs_loc_growth_rate,
+                        action: move |mut s: Signal<State>| {
+                            s.write().manual_senior_devs += Decimal::ONE;
+                            let manual_senior_devs_loc_cost = sum_geometric_series(
+                                &Decimal::ONE,
+                                &constants.senior_devs_loc_base_cost,
+                                &constants.senior_devs_loc_growth_rate,
+                                &state.read().manual_senior_devs,
+                            );
+                            s.write().loc -= manual_senior_devs_loc_cost;
+                        },
+                    }
+                    RepeatableAction{
+                        state: state,
+                        require: Some(Research::HumanResources),
+                        produced: Some(state.read().manual_hrs),
+                        button_name: "hire HR",
+                        debug_message: "hire HR",
+                        description: "Hire devs",
+                        loc_base_cost: constants.hrs_loc_base_cost,
+                        loc_growth_rate: constants.hrs_loc_growth_rate,
+                        action: move |mut s: Signal<State>| {
+                            s.write().manual_hrs += Decimal::ONE;
+                            let manual_hrs_loc_cost = sum_geometric_series(
+                                &Decimal::ONE,
+                                &constants.hrs_loc_base_cost,
+                                &constants.hrs_loc_growth_rate,
+                                &state.read().manual_hrs,
+                            );
+                            s.write().loc -= manual_hrs_loc_cost;
+                        },
+                    }
+                    RepeatableAction{
+                        state: state,
+                        require: Some(Research::ProjectManagement),
+                        produced: Some(state.read().manual_pms),
+                        button_name: "hire PM",
+                        debug_message: "hire PN",
+                        description: "Convert bugs to features",
+                        loc_base_cost: constants.pms_loc_base_cost,
+                        loc_growth_rate: constants.pms_loc_growth_rate,
+                        action: move |mut s: Signal<State>| {
+                            s.write().manual_pms += Decimal::ONE;
+                            let manual_pms_loc_cost = sum_geometric_series(
+                                &Decimal::ONE,
+                                &constants.pms_loc_base_cost,
+                                &constants.pms_loc_growth_rate,
+                                &state.read().manual_pms,
+                            );
+                            s.write().loc -= manual_pms_loc_cost;
+                        },
+                    }
+                    RepeatableAction{
+                        state: state,
+                        require: Some(Research::Rmrf),
+                        produced: None,
+                        button_name: "rm -rf",
+                        debug_message: "rm -rf",
+                        description: "Wipe all loc and bugs",
+                        loc_base_cost: Decimal::ZERO,
+                        loc_growth_rate: Decimal::ONE,
+                        action: move |mut s: Signal<State>| {
+                            s.write().loc = Decimal::ZERO;
+                            s.write().bugs = Decimal::ZERO;
+                        },
+                    }
                     if state.read().researched.contains(&Research::Cheating) {
                         CheatAction{
                             state: state,

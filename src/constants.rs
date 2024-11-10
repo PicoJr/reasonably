@@ -192,16 +192,3 @@ pub(crate) enum Research {
     ToggleTheme,
     Universe,
 }
-
-#[derive(Debug,Clone,PartialEq,Eq)]
-#[repr(u8)]
-pub(crate) enum Clicks {
-    Code,
-    Debug,
-    HireInterns,
-    HireJuniorDevs,
-    HireSeniorDevs,
-    HireHRs,
-    HirePMs,
-    Rmrf,
-}
