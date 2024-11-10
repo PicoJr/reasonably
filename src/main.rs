@@ -376,44 +376,60 @@ fn Home() -> Element {
                     if state.read().researched.contains(&Research::Cheating) {
                         CheatAction{
                             state: state,
-                            clicks: Clicks::Code,
                             button_name: "cheat loc",
                             debug_message: "cheating loc...",
+                            action: move |mut s: Signal<State>| {
+                                s.write().loc *= Decimal::new(2.0)
+                            },
                         }
                         CheatAction{
                             state: state,
-                            clicks: Clicks::Debug,
-                            button_name: "cheat bugs",
-                            debug_message: "cheating bugs...",
+                            button_name: "cheat debug",
+                            debug_message: "cheating debug...",
+                            action: move |mut s: Signal<State>| {
+                                s.write().bugs *= Decimal::new(0.5)
+                            },
                         }
                         CheatAction{
                             state: state,
-                            clicks: Clicks::HireInterns,
                             button_name: "cheat interns",
                             debug_message: "cheating interns...",
+                            action: move |mut s: Signal<State>| {
+                                s.write().interns *= Decimal::new(2.0)
+                            },
                         }
                         CheatAction{
                             state: state,
-                            clicks: Clicks::HireJuniorDevs,
                             button_name: "cheat junior devs",
                             debug_message: "cheating junior devs...",
+                            action: move |mut s: Signal<State>| {
+                                s.write().junior_devs *= Decimal::new(2.0)
+                            },
                         }
                         CheatAction{
                             state: state,
-                            clicks: Clicks::HireSeniorDevs,
                             button_name: "cheat senior devs",
                             debug_message: "cheating senior devs...",
+                            action: move |mut s: Signal<State>| {
+                                s.write().senior_devs *= Decimal::new(2.0)
+                            },
                         }
-                        button {
-                            onclick: move |_| {
-                                state.write().dt *= Decimal::new(2.0);
+                        CheatAction{
+                            state: state,
+                            button_name: "cheat dt faster",
+                            debug_message: "cheating dt faster",
+                            action: move |mut s: Signal<State>| {
+                                s.write().dt *= Decimal::new(2.0)
+                            },
                         }
-                        , {"cheat time faster"} }
-                        button {
-                            onclick: move |_| {
-                                state.write().dt /= Decimal::new(2.0);
+                        CheatAction{
+                            state: state,
+                            button_name: "cheat dt slower",
+                            debug_message: "cheating dt slower",
+                            action: move |mut s: Signal<State>| {
+                                s.write().dt *= Decimal::new(0.5)
+                            },
                         }
-                        , {"cheat time slower"} }
                     }
                 }
                 div { // vertical
