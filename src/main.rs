@@ -359,14 +359,18 @@ fn Home() -> Element {
                     class: "repeatable-actions",
                     SimpleAction {
                         state: state,
-                        clicks: Clicks::Code,
                         button_name: "code",
+                        action: move |mut s: Signal<State>| {
+                            s.write().loc += Decimal::new(1.0)
+                        },
                     }
                     if state.read().bugs > Decimal::ZERO {
                         SimpleAction {
                             state: state,
-                            clicks: Clicks::Debug,
                             button_name: "debug",
+                            action: move |mut s: Signal<State>| {
+                                s.write().bugs -= Decimal::new(1.0)
+                            },
                         }
                     }
                     ToggleThemeAction {
