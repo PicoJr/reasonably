@@ -13,7 +13,6 @@ use crate::state::State;
 pub(crate) fn ResearchOnce(
     mut state: Signal<State>,
     research_name: Research,
-    research_alias: Option<Research>, // also insert this alias in `researched`
     require: Option<Research>,
     button_name: String,
     debug_message: String,
@@ -44,9 +43,6 @@ pub(crate) fn ResearchOnce(
                     disabled: disabled,
                     onclick: move |_| {
                     state.write().researched.insert(research_name.clone());
-                    if let Some(alias) = &research_alias {
-                        state.write().researched.insert(alias.clone());
-                    }
                     state.write().logs.log(
                         &debug_message
                     );
