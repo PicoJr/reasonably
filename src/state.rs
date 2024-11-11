@@ -102,21 +102,6 @@ impl State {
     }
 
     pub(crate) fn update(&mut self, dt_seconds: Decimal) {
-        // multipliers
-        /*
-        if self.researched.contains(&Research::SyntaxColoringMultiplierAlias) {
-            self.interns_loc_dt *= constants.research_syntax_coloring_multiplier;
-            self.researched.remove(&Research::SyntaxColoringMultiplierAlias);
-        }
-
-        if self.researched.contains(&Research::ManagementCareerAlias) {
-            let retirement_ratio_dt = self.senior_devs_retirement_ratio_dt;
-            self.senior_devs_retirement_ratio_dt = retirement_ratio_dt * (Decimal::ONE - constants.senior_devs_management_career_ratio);
-            self.senior_devs_management_ratio_dt = retirement_ratio_dt * constants.senior_devs_management_career_ratio;
-            self.researched.remove(&Research::ManagementCareerAlias);
-        }
-        */
-
         // loc produced by devs
         let auto_loc = (
             (self.interns + self.manual_interns) * self.interns_loc_dt

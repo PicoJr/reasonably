@@ -19,6 +19,7 @@ pub(crate) fn ResearchOnce(
     description: String,
     loc_cost: Decimal,
     quest: bool,
+    action: Option<EventHandler<Signal<State>>>,
 ) -> Element {
     let (css_class, css_button_class) = if quest {
         ("quest", "quest-button")
@@ -42,12 +43,15 @@ pub(crate) fn ResearchOnce(
                     class: css_button_class,
                     disabled: disabled,
                     onclick: move |_| {
-                    state.write().researched.insert(research_name.clone());
-                    state.write().logs.log(
-                        &debug_message
-                    );
-                    state.write().loc -= loc_cost;
-                }
+                        state.write().researched.insert(research_name.clone());
+                        state.write().logs.log(
+                            &debug_message
+                        );
+                        state.write().loc -= loc_cost;
+                        if let Some(action) = action {
+                            action.call(state);
+                        }
+                    }
                 , {button_name} }
             }
         }

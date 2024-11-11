@@ -437,6 +437,9 @@ fn Home() -> Element {
                         description: "Boost interns locs/s x2",
                         loc_cost: constants.research_syntax_coloring_multiplier_loc_cost,
                         quest: false,
+                        action: move |mut s: Signal<State>| {
+                            s.write().interns_loc_dt *= constants.research_syntax_coloring_multiplier;
+                        },
                     }
                     ResearchOnce{
                         state: state,
@@ -467,6 +470,11 @@ fn Home() -> Element {
                         description: "Instead of retiring, some senior devs will become PMs",
                         loc_cost: constants.research_management_career_loc_cost,
                         quest: false,
+                        action: move |mut s: Signal<State>| {
+                            let retirement_ratio_dt = s.read().senior_devs_retirement_ratio_dt;
+                            s.write().senior_devs_retirement_ratio_dt = retirement_ratio_dt * (Decimal::ONE - constants.senior_devs_management_career_ratio);
+                            s.write().senior_devs_management_ratio_dt = retirement_ratio_dt * constants.senior_devs_management_career_ratio;
+                        },
                     }
                 }
                 div { // vertical
