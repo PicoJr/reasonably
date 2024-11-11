@@ -100,6 +100,91 @@ impl State {
             dt: constants.dt,
         }
     }
+
+    pub(crate) fn update(&mut self, dt_seconds: Decimal) {
+        // multipliers
+        /*
+        if self.researched.contains(&Research::SyntaxColoringMultiplierAlias) {
+            self.interns_loc_dt *= constants.research_syntax_coloring_multiplier;
+            self.researched.remove(&Research::SyntaxColoringMultiplierAlias);
+        }
+
+        if self.researched.contains(&Research::ManagementCareerAlias) {
+            let retirement_ratio_dt = self.senior_devs_retirement_ratio_dt;
+            self.senior_devs_retirement_ratio_dt = retirement_ratio_dt * (Decimal::ONE - constants.senior_devs_management_career_ratio);
+            self.senior_devs_management_ratio_dt = retirement_ratio_dt * constants.senior_devs_management_career_ratio;
+            self.researched.remove(&Research::ManagementCareerAlias);
+        }
+        */
+
+        // loc produced by devs
+        let auto_loc = (
+            (self.interns + self.manual_interns) * self.interns_loc_dt
+                + (self.junior_devs + self.manual_junior_devs) * self.junior_devs_loc_dt
+                + (self.senior_devs + self.manual_senior_devs) * self.senior_devs_loc_dt
+        ) * self.dt;
+        // bugs produced by devs
+        let auto_bugs = (
+            (self.interns + self.manual_interns) * self.interns_loc_dt * self.interns_bugs_ratio
+                + (self.junior_devs + self.manual_junior_devs) * self.junior_devs_loc_dt * self.junior_devs_bugs_ratio
+                + (self.senior_devs + self.manual_senior_devs) * self.senior_devs_loc_dt * self.senior_devs_bugs_ratio
+        ) * self.dt;
+
+        // update loc, accounting all sources
+        self.loc += auto_loc;
+        // update live code metrics
+        self.loc_dt = auto_loc * dt_seconds;
+
+        let auto_bugs_converted_capacity = (self.pms + self.manual_pms) * self.pms_bugs_conversion_dt * self.dt;
+        // make sure we do not convert more bugs than available
+        let bugs_converted = self.bugs.min(&auto_bugs_converted_capacity);
+        let bugs_delta = auto_bugs - bugs_converted;
+        self.bugs += bugs_delta;
+        self.bugs_dt = bugs_delta * dt_seconds;
+
+        self.features += bugs_converted;
+        self.features_dt = bugs_converted * dt_seconds;
+
+        let auto_interns = (self.hrs + self.manual_hrs) * self.hrs_interns_dt * self.hrs_interns_quota * self.dt;
+        let auto_junior_devs = (self.hrs + self.manual_hrs) * self.hrs_junior_devs_dt * self.hrs_junior_devs_quota * self.dt;
+        let auto_senior_devs = (self.hrs + self.manual_hrs) * self.hrs_senior_devs_dt * self.hrs_senior_devs_quota * self.dt;
+
+        // update interns, junior devs, senior devs count, accounting for all sources
+        self.interns += auto_interns;
+        self.junior_devs += auto_junior_devs;
+        self.senior_devs += auto_senior_devs;
+        let seniors_becoming_pms = (self.senior_devs + self.manual_senior_devs) * self.senior_devs_management_ratio_dt * self.dt;
+        self.pms += seniors_becoming_pms;
+
+        // handle promotions & retirement...
+        let retired_seniors = (self.senior_devs + self.manual_senior_devs) * self.senior_devs_retirement_ratio_dt * self.dt;
+        self.retired_devs += retired_seniors;
+        let remaining_seniors = self.senior_devs * (Decimal::ONE - self.senior_devs_retirement_ratio_dt * self.dt);
+        self.senior_devs = remaining_seniors;
+        let remaining_manual_seniors =self.manual_senior_devs * (Decimal::ONE - self.senior_devs_retirement_ratio_dt * self.dt);
+        self.manual_senior_devs = remaining_manual_seniors;
+
+        if self.researched.contains(&Research::JuniorDevsPromotion) {
+            let juniors_promoted_to_seniors = (self.junior_devs + self.manual_junior_devs) * self.junior_devs_promotion_ratio_dt * self.dt;
+            self.senior_devs += juniors_promoted_to_seniors;
+            let remaining_juniors = self.junior_devs * (Decimal::ONE - self.junior_devs_promotion_ratio_dt * self.dt);
+            self.junior_devs = remaining_juniors;
+            let remaining_manual_juniors = self.manual_junior_devs * (Decimal::ONE - self.junior_devs_promotion_ratio_dt * self.dt);
+            self.manual_junior_devs = remaining_manual_juniors;
+        }
+
+        if self.researched.contains(&Research::InternsPromotion) {
+            let interns_promoted_juniors = (self.interns + self.manual_interns) * self.interns_promotion_ratio_dt * self.dt;
+            self.junior_devs += interns_promoted_juniors;
+            let remaining_interns = self.interns * (Decimal::ONE - self.interns_promotion_ratio_dt * self.dt);
+            self.interns = remaining_interns;
+            let remaining_manual_interns = self.manual_interns * (Decimal::ONE - self.interns_promotion_ratio_dt * self.dt);
+            self.manual_interns = remaining_manual_interns;
+        }
+
+        // update current time
+        self.current_time = Instant::now();
+    }
 }
 
 impl Default for State {
