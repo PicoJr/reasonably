@@ -13,20 +13,22 @@ mod speedrun;
 mod state;
 mod simple_action;
 mod research_data;
+mod cheat_action_data;
+mod repeatable_action_data;
 
 use simple_logs::{Logs};
-use repeatable_action::RepeatableAction;
 use toggle_theme_action::ToggleThemeAction;
 use research_once::ResearchOnce;
 
-use break_infinity::{sum_geometric_series, Decimal};
+use break_infinity::Decimal;
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
 use async_std::task::sleep;
-use crate::cheat_action::CheatAction;
+use crate::cheat_action_data::CheatActions;
 use crate::constants::{GameConstants, Research};
 use crate::metrics::Metrics;
+use crate::repeatable_action_data::RepeatableActions;
 use crate::research_data::Researches;
 use crate::resources::Resources;
 use crate::simple_action::SimpleAction;
@@ -155,182 +157,17 @@ fn Home() -> Element {
                     ToggleThemeAction {
                         state: state,
                     }
-                    RepeatableAction{
+                    RepeatableActions {
                         state: state,
-                        require: Some(Research::Internship),
-                        produced: Some(state.read().manual_interns),
-                        button_name: "hire intern",
-                        debug_message: "hire intern",
-                        description: "Produces loc, and bugs",
-                        loc_base_cost: constants.interns_loc_base_cost,
-                        loc_growth_rate: constants.interns_loc_growth_rate,
-                        action: move |mut s: Signal<State>| {
-                            s.write().manual_interns += Decimal::ONE;
-                            let manual_interns_loc_cost = sum_geometric_series(
-                                &Decimal::ONE,
-                                &constants.interns_loc_base_cost,
-                                &constants.interns_loc_growth_rate,
-                                &state.read().manual_interns,
-                            );
-                            s.write().loc -= manual_interns_loc_cost;
-                        },
+                        constants: constants.clone(),
                     }
-                    RepeatableAction{
+                    CheatActions {
                         state: state,
-                        require: Some(Research::JuniorDevsPosition),
-                        produced: Some(state.read().manual_junior_devs),
-                        button_name: "hire junior devs",
-                        debug_message: "hire junior devs",
-                        description: "Produces loc, and bugs",
-                        loc_base_cost: constants.junior_devs_loc_base_cost,
-                        loc_growth_rate: constants.junior_devs_loc_growth_rate,
-                        action: move |mut s: Signal<State>| {
-                            s.write().manual_junior_devs += Decimal::ONE;
-                            let manual_junior_devs_loc_cost = sum_geometric_series(
-                                &Decimal::ONE,
-                                &constants.junior_devs_loc_base_cost,
-                                &constants.junior_devs_loc_growth_rate,
-                                &state.read().manual_junior_devs,
-                            );
-                            s.write().loc -= manual_junior_devs_loc_cost;
-                        },
-                    }
-                    RepeatableAction{
-                        state: state,
-                        require: Some(Research::SeniorDevsPosition),
-                        produced: Some(state.read().manual_senior_devs),
-                        button_name: "hire senior devs",
-                        debug_message: "hire senior devs",
-                        description: "Produces loc, and bugs",
-                        loc_base_cost: constants.senior_devs_loc_base_cost,
-                        loc_growth_rate: constants.senior_devs_loc_growth_rate,
-                        action: move |mut s: Signal<State>| {
-                            s.write().manual_senior_devs += Decimal::ONE;
-                            let manual_senior_devs_loc_cost = sum_geometric_series(
-                                &Decimal::ONE,
-                                &constants.senior_devs_loc_base_cost,
-                                &constants.senior_devs_loc_growth_rate,
-                                &state.read().manual_senior_devs,
-                            );
-                            s.write().loc -= manual_senior_devs_loc_cost;
-                        },
-                    }
-                    RepeatableAction{
-                        state: state,
-                        require: Some(Research::HumanResources),
-                        produced: Some(state.read().manual_hrs),
-                        button_name: "hire HR",
-                        debug_message: "hire HR",
-                        description: "Hire devs",
-                        loc_base_cost: constants.hrs_loc_base_cost,
-                        loc_growth_rate: constants.hrs_loc_growth_rate,
-                        action: move |mut s: Signal<State>| {
-                            s.write().manual_hrs += Decimal::ONE;
-                            let manual_hrs_loc_cost = sum_geometric_series(
-                                &Decimal::ONE,
-                                &constants.hrs_loc_base_cost,
-                                &constants.hrs_loc_growth_rate,
-                                &state.read().manual_hrs,
-                            );
-                            s.write().loc -= manual_hrs_loc_cost;
-                        },
-                    }
-                    RepeatableAction{
-                        state: state,
-                        require: Some(Research::ProjectManagement),
-                        produced: Some(state.read().manual_pms),
-                        button_name: "hire PM",
-                        debug_message: "hire PN",
-                        description: "Convert bugs to features",
-                        loc_base_cost: constants.pms_loc_base_cost,
-                        loc_growth_rate: constants.pms_loc_growth_rate,
-                        action: move |mut s: Signal<State>| {
-                            s.write().manual_pms += Decimal::ONE;
-                            let manual_pms_loc_cost = sum_geometric_series(
-                                &Decimal::ONE,
-                                &constants.pms_loc_base_cost,
-                                &constants.pms_loc_growth_rate,
-                                &state.read().manual_pms,
-                            );
-                            s.write().loc -= manual_pms_loc_cost;
-                        },
-                    }
-                    RepeatableAction{
-                        state: state,
-                        require: Some(Research::Rmrf),
-                        produced: None,
-                        button_name: "rm -rf",
-                        debug_message: "rm -rf",
-                        description: "Wipe all loc and bugs",
-                        loc_base_cost: Decimal::ZERO,
-                        loc_growth_rate: Decimal::ONE,
-                        action: move |mut s: Signal<State>| {
-                            s.write().loc = Decimal::ZERO;
-                            s.write().bugs = Decimal::ZERO;
-                        },
-                    }
-                    if state.read().researched.contains(&Research::Cheating) {
-                        CheatAction{
-                            state: state,
-                            button_name: "cheat loc",
-                            debug_message: "cheating loc...",
-                            action: move |mut s: Signal<State>| {
-                                s.write().loc *= Decimal::new(2.0)
-                            },
-                        }
-                        CheatAction{
-                            state: state,
-                            button_name: "cheat debug",
-                            debug_message: "cheating debug...",
-                            action: move |mut s: Signal<State>| {
-                                s.write().bugs *= Decimal::new(0.5)
-                            },
-                        }
-                        CheatAction{
-                            state: state,
-                            button_name: "cheat interns",
-                            debug_message: "cheating interns...",
-                            action: move |mut s: Signal<State>| {
-                                s.write().interns *= Decimal::new(2.0)
-                            },
-                        }
-                        CheatAction{
-                            state: state,
-                            button_name: "cheat junior devs",
-                            debug_message: "cheating junior devs...",
-                            action: move |mut s: Signal<State>| {
-                                s.write().junior_devs *= Decimal::new(2.0)
-                            },
-                        }
-                        CheatAction{
-                            state: state,
-                            button_name: "cheat senior devs",
-                            debug_message: "cheating senior devs...",
-                            action: move |mut s: Signal<State>| {
-                                s.write().senior_devs *= Decimal::new(2.0)
-                            },
-                        }
-                        CheatAction{
-                            state: state,
-                            button_name: "cheat dt faster",
-                            debug_message: "cheating dt faster",
-                            action: move |mut s: Signal<State>| {
-                                s.write().dt *= Decimal::new(2.0)
-                            },
-                        }
-                        CheatAction{
-                            state: state,
-                            button_name: "cheat dt slower",
-                            debug_message: "cheating dt slower",
-                            action: move |mut s: Signal<State>| {
-                                s.write().dt *= Decimal::new(0.5)
-                            },
-                        }
                     }
                 }
                 Researches {
                     state: state,
-                    constants: constants,
+                    constants: constants.clone(),
                 }
                 div { // vertical
                     class: "quests",
