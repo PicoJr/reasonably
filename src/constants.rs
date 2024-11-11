@@ -1,6 +1,6 @@
 use break_infinity::Decimal;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct GameConstants {
     // interns recruitment cost
     pub interns_loc_base_cost: Decimal,
