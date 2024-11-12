@@ -1,16 +1,14 @@
 #![allow(non_snake_case)]
+use crate::constants::Research;
+use crate::format_decimal::{format_decimal_bugs, format_decimal_features, format_decimal_loc};
+use crate::state::State;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Signal};
+use dioxus::prelude::Signal;
 use dioxus::prelude::*;
-use crate::constants::Research;
-use crate::format_decimal::{format_decimal_loc, format_decimal_bugs, format_decimal_features};
-use crate::state::State;
 
 #[component]
-pub(crate) fn Metrics(
-    state: Signal<State>,
-) -> Element {
+pub(crate) fn Metrics(state: Signal<State>) -> Element {
     rsx! {
         if state.read().researched.contains(&Research::CodeMetrics) {
             div {

@@ -1,19 +1,16 @@
 #![allow(non_snake_case)]
-use break_infinity::{Decimal, sum_geometric_series};
-use dioxus::core_macro::{component, rsx};
-use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Signal, Writable};
-use dioxus::prelude::*;
 use crate::constants::{GameConstants, Research};
 use crate::repeatable_action::RepeatableAction;
+use break_infinity::{sum_geometric_series, Decimal};
+use dioxus::core_macro::{component, rsx};
+use dioxus::dioxus_core::Element;
+use dioxus::prelude::*;
+use dioxus::prelude::{Signal, Writable};
 
 use crate::state::State;
 
 #[component]
-pub(crate) fn RepeatableActions(
-    mut state: Signal<State>,
-    constants: GameConstants,
-) -> Element {
+pub(crate) fn RepeatableActions(mut state: Signal<State>, constants: GameConstants) -> Element {
     rsx! {
         RepeatableAction{
             state: state,

@@ -1,20 +1,17 @@
 #![allow(non_snake_case)]
+use crate::constants::{GameConstants, Research};
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
-use crate::constants::{GameConstants, Research};
+use dioxus::prelude::{Signal, Writable};
 
 use crate::research_once::ResearchOnce;
 use crate::state::State;
 
 #[component]
-pub(crate) fn Researches(
-    mut state: Signal<State>,
-    constants: GameConstants,
-) -> Element {
-    rsx!{
+pub(crate) fn Researches(mut state: Signal<State>, constants: GameConstants) -> Element {
+    rsx! {
         div { // vertical
             class: "researches",
             ResearchOnce{

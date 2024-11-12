@@ -1,11 +1,11 @@
 #![allow(non_snake_case)]
-use std::collections::{VecDeque};
-use dioxus::core_macro::{component, rsx};
-use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Readable, Signal};
-use dioxus::prelude::*;
 use crate::constants::Research;
 use crate::state::State;
+use dioxus::core_macro::{component, rsx};
+use dioxus::dioxus_core::Element;
+use dioxus::prelude::*;
+use dioxus::prelude::{Readable, Signal};
+use std::collections::VecDeque;
 
 pub(crate) struct SimpleLogs {
     max_lines: usize,
@@ -34,9 +34,7 @@ impl SimpleLogs {
 }
 
 #[component]
-pub(crate) fn Logs(
-    state: Signal<State>,
-) -> Element {
+pub(crate) fn Logs(state: Signal<State>) -> Element {
     rsx! {
         if state.read().researched.contains(&Research::Logs) {
             div {

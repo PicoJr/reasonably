@@ -1,18 +1,16 @@
 #![allow(non_snake_case)]
+use crate::cheat_action::CheatAction;
+use crate::constants::Research;
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
-use crate::cheat_action::CheatAction;
-use crate::constants::Research;
+use dioxus::prelude::{Signal, Writable};
 
 use crate::state::State;
 
 #[component]
-pub(crate) fn CheatActions(
-    mut state: Signal<State>,
-) -> Element {
+pub(crate) fn CheatActions(mut state: Signal<State>) -> Element {
     rsx! {
         if state.read().researched.contains(&Research::Cheating) {
             CheatAction{

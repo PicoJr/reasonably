@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
+use crate::state::State;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
-use crate::state::State;
+use dioxus::prelude::{Signal, Writable};
 
 #[component]
 pub(crate) fn CheatAction(

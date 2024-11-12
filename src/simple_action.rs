@@ -1,11 +1,11 @@
 #![allow(non_snake_case)]
 
-use web_time::{Instant};
+use crate::state::State;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
 use dioxus::prelude::Signal;
 use dioxus::prelude::*;
-use crate::state::State;
+use web_time::Instant;
 
 #[component]
 pub(crate) fn SimpleAction(

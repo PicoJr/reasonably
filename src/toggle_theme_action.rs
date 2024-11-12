@@ -1,17 +1,15 @@
 #![allow(non_snake_case)]
+use crate::constants::Research;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
-use crate::constants::Research;
+use dioxus::prelude::{Signal, Writable};
 
 use crate::state::State;
 use crate::Theme;
 
 #[component]
-pub(crate) fn ToggleThemeAction(
-    mut state: Signal<State>,
-) -> Element {
+pub(crate) fn ToggleThemeAction(mut state: Signal<State>) -> Element {
     let current_theme: Theme = state.read().theme.clone();
     rsx! {
         if state.read().researched.contains(&Research::ToggleTheme) {

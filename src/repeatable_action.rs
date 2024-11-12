@@ -1,10 +1,10 @@
 #![allow(non_snake_case)]
+use crate::constants::Research;
 use break_infinity::Decimal;
 use dioxus::core_macro::{component, rsx};
 use dioxus::dioxus_core::Element;
-use dioxus::prelude::{Signal, Writable};
 use dioxus::prelude::*;
-use crate::constants::{Research};
+use dioxus::prelude::{Signal, Writable};
 
 use crate::format_decimal::format_decimal_loc;
 use crate::state::State;
@@ -23,7 +23,7 @@ pub(crate) fn RepeatableAction(
 ) -> Element {
     let requirements_met = require.map_or_else(
         || true,
-        |research_name_required| state.read().researched.contains(&research_name_required)
+        |research_name_required| state.read().researched.contains(&research_name_required),
     );
     let new_instances = if let Some(produced) = produced {
         produced + Decimal::new(1.0)
