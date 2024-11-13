@@ -172,7 +172,10 @@ body {
 }
 
 .repeatable-action {
+    border: 1px solid var(--bg-color);
     width:100%;
+    padding:1em;
+    box-sizing: border-box;
     background-color: var(--research-bg-color);
     color: var(--text-color);
     animation: fadeIn var(--fade-duration);
