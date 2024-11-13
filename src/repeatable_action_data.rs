@@ -126,5 +126,24 @@ pub(crate) fn RepeatableActions(mut state: Signal<State>, constants: GameConstan
                 s.write().bugs = Decimal::ZERO;
             },
         }
+        RepeatableAction{
+            state: state,
+            require: Some(Research::SmartStaffing),
+            produced: None,
+            button_name: "Smart Staffing",
+            debug_message: "smart staffing",
+            description: "Optimize head count by 20%",
+            loc_base_cost: Decimal::ZERO,
+            loc_growth_rate: Decimal::ONE,
+            action: move |mut s: Signal<State>| {
+                let ratio = Decimal::new(0.8);
+                s.write().interns *= ratio;
+                s.write().manual_interns *= ratio;
+                s.write().junior_devs *= ratio;
+                s.write().manual_junior_devs *= ratio;
+                s.write().senior_devs *= ratio;
+                s.write().manual_senior_devs *= ratio;
+            },
+        }
     }
 }

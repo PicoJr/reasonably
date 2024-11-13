@@ -149,6 +149,16 @@ pub(crate) fn Researches(mut state: Signal<State>, constants: GameConstants) -> 
             }
             ResearchOnce{
                 state: state,
+                require: Some(Research::HumanResources),
+                research_name: Research::SmartStaffing,
+                button_name: "research smart staffing",
+                debug_message: format!("{:?} researched", Research::SmartStaffing),
+                description: "Smart staffing a.k.a massive layoffs",
+                loc_cost: constants.research_smart_staffing_loc_cost,
+                quest: false,
+            }
+            ResearchOnce{
+                state: state,
                 require: Some(Research::ProjectManagement),
                 research_name: Research::ManagementCareer,
                 button_name: "research management career",

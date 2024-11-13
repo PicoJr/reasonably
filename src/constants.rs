@@ -32,6 +32,7 @@ pub(crate) struct GameConstants {
     pub research_toggle_theme_loc_cost: Decimal,
     pub research_syntax_coloring_multiplier_loc_cost: Decimal,
     pub research_management_career_loc_cost: Decimal,
+    pub research_smart_staffing_loc_cost: Decimal,
     // initial promotion ratio
     pub interns_promotion_ratio_dt: Decimal,
     pub junior_devs_promotion_ratio_dt: Decimal,
@@ -108,6 +109,7 @@ impl Default for GameConstants {
             research_toggle_theme_loc_cost: Decimal::new(1.0),
             research_syntax_coloring_multiplier_loc_cost: Decimal::new(1.0),
             research_management_career_loc_cost: Decimal::new(1.0),
+            research_smart_staffing_loc_cost: Decimal::new(1.0),
             interns_promotion_ratio_dt: Decimal::new(0.04),
             junior_devs_promotion_ratio_dt: Decimal::new(0.02),
             senior_devs_retirement_ratio_dt: Decimal::new(0.01),
@@ -183,6 +185,7 @@ pub(crate) enum Research {
     ProjectManagement,
     Rmrf,
     SeniorDevsPosition,
+    SmartStaffing,
     SolarSystem,
     Speedrun,
     SyntaxColoringMultiplier,
