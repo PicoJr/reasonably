@@ -17,7 +17,6 @@ mod state;
 mod toggle_theme_action;
 mod quest_data;
 
-use research_once::ResearchOnce;
 use simple_logs::Logs;
 use toggle_theme_action::ToggleThemeAction;
 
@@ -26,7 +25,7 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
 use crate::cheat_action_data::CheatActions;
-use crate::constants::{GameConstants, Research};
+use crate::constants::{GameConstants};
 use crate::metrics::Metrics;
 use crate::repeatable_action_data::RepeatableActions;
 use crate::research_data::Researches;
