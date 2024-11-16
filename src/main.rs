@@ -15,6 +15,7 @@ mod simple_logs;
 mod speedrun;
 mod state;
 mod toggle_theme_action;
+mod quest_data;
 
 use research_once::ResearchOnce;
 use simple_logs::Logs;
@@ -34,6 +35,7 @@ use crate::simple_action::SimpleAction;
 use crate::speedrun::Speedrun;
 use crate::state::State;
 use async_std::task::sleep;
+use crate::quest_data::Quests;
 
 #[derive(Clone, Debug, PartialEq)]
 #[repr(u8)]
@@ -73,143 +75,6 @@ fn Home() -> Element {
             state.write().update(dt_seconds);
             // sleep before next tick
             sleep(std::time::Duration::from_millis(dt_milliseconds)).await;
-        }
-    });
-
-    let quests_rendered = vec![
-        (
-            Research::HelloWorld,
-            "code hello world",
-            "Your 1st program",
-            None,
-            constants.quest_hello_world_loc_cost,
-        ),
-        (
-            Research::FizzBuzz,
-            "code Fizzbuzz",
-            "Your 2nd program",
-            Some(Research::HelloWorld),
-            constants.quest_fizz_buzz_loc_cost,
-        ),
-        (
-            Research::Calculator,
-            "code calculator",
-            "Your 3rd program",
-            Some(Research::FizzBuzz),
-            constants.quest_calculator_loc_cost,
-        ),
-        (
-            Research::GameOfLife,
-            "code game of life",
-            "?",
-            Some(Research::Calculator),
-            constants.quest_game_of_life_loc_cost,
-        ),
-        (
-            Research::TextEditor,
-            "code a text editor",
-            "?",
-            Some(Research::GameOfLife),
-            constants.quest_text_editor_loc_cost,
-        ),
-        (
-            Research::PhysicsEngine,
-            "code a physics engine",
-            "?",
-            Some(Research::TextEditor),
-            constants.quest_physics_engine_loc_cost,
-        ),
-        (
-            Research::Bacteria,
-            "simulate a bacteria",
-            "?",
-            Some(Research::PhysicsEngine),
-            constants.quest_bacteria_loc_cost,
-        ),
-        (
-            Research::Browser,
-            "code a browser",
-            "?",
-            Some(Research::Bacteria),
-            constants.quest_browser_loc_cost,
-        ),
-        (
-            Research::Kernel,
-            "code a kernel",
-            "?",
-            Some(Research::Browser),
-            constants.quest_kernel_loc_cost,
-        ),
-        (
-            Research::Mouse,
-            "simulate a mouse",
-            "?",
-            Some(Research::Kernel),
-            constants.quest_mouse_loc_cost,
-        ),
-        (
-            Research::HumanBrain,
-            "simulate a human brain",
-            "?",
-            Some(Research::Mouse),
-            constants.quest_human_brain_loc_cost,
-        ),
-        (
-            Research::Economy,
-            "simulate the economy",
-            "?",
-            Some(Research::HumanBrain),
-            constants.quest_economy_loc_cost,
-        ),
-        (
-            Research::Climate,
-            "simulate the climate",
-            "?",
-            Some(Research::Economy),
-            constants.quest_climate_loc_cost,
-        ),
-        (
-            Research::Earth,
-            "simulate the Earth",
-            "?",
-            Some(Research::Climate),
-            constants.quest_earth_loc_cost,
-        ),
-        (
-            Research::SolarSystem,
-            "simulate the solar system",
-            "?",
-            Some(Research::Earth),
-            constants.quest_solar_system_loc_cost,
-        ),
-        (
-            Research::Universe,
-            "simulate the universe",
-            "?",
-            Some(Research::SolarSystem),
-            constants.quest_universe_loc_cost,
-        ),
-        (
-            Research::Differentiation,
-            "differentiate the simulation",
-            "?",
-            Some(Research::Universe),
-            constants.quest_differentiation_loc_cost,
-        ),
-    ]
-    .into_iter()
-    .map(|(name, button_name, description, require, loc_cost)| {
-        rsx! {
-            ResearchOnce{
-                state: state,
-                require: require,
-                research_name: name,
-                button_name: button_name,
-                debug_message: button_name,
-                description: description,
-                loc_cost: loc_cost,
-                quest: true,
-            }
         }
     });
 
@@ -273,9 +138,9 @@ fn Home() -> Element {
                     state: state,
                     constants: constants.clone(),
                 }
-                div { // vertical
-                    class: "quests",
-                    {quests_rendered}
+                Quests {
+                    state: state,
+                    constants: constants.clone(),
                 }
             }
         }

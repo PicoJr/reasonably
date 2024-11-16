@@ -15,19 +15,19 @@ pub(crate) fn ResearchOnce(
     research_name: Research,
     require: Option<Research>,
     button_name: String,
-    debug_message: String,
+    debug_message: Option<String>,
     description: String,
     loc_cost: Decimal,
     quest: bool,
     action: Option<EventHandler<Signal<State>>>,
 ) -> Element {
+    let debug_message = debug_message.unwrap_or_else(|| format!("{:?} researched", Research::ToggleTheme));
     let (css_class, css_button_class) = if quest {
         ("quest", "quest-button")
     } else {
         ("research", "research-button")
     };
     let disabled = state.read().loc < loc_cost;
-    // only show if not researched already
     let already_researched = state.read().researched.contains(&research_name);
     let requirements_met = require.map_or_else(
         || true,
