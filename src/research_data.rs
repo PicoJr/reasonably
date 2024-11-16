@@ -145,6 +145,15 @@ pub(crate) fn Researches(mut state: Signal<State>, constants: GameConstants) -> 
             }
             ResearchOnce{
                 state: state,
+                require: Some(Research::HumanResources),
+                research_name: Research::RecursiveHR,
+                button_name: "research recursive HR",
+                description: "HR now recruit themselves",
+                loc_cost: constants.research_recursive_hr_loc_cost,
+                quest: false,
+            }
+            ResearchOnce{
+                state: state,
                 require: Some(Research::ProjectManagement),
                 research_name: Research::ManagementCareer,
                 button_name: "research management career",

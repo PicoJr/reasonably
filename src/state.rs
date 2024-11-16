@@ -42,6 +42,8 @@ pub(crate) struct State {
     pub hrs_junior_devs_quota: Decimal,
     pub hrs_senior_devs_dt: Decimal,
     pub hrs_senior_devs_quota: Decimal,
+    pub hrs_hrs_dt: Decimal,
+    pub hrs_hrs_quota: Decimal,
     pub pms: Decimal,
     pub pms_bugs_conversion_dt: Decimal,
     pub interns_promotion_ratio_dt: Decimal,
@@ -91,6 +93,8 @@ impl State {
             hrs_junior_devs_quota: constants.hrs_junior_devs_quota,
             hrs_senior_devs_dt: constants.hrs_senior_devs_dt,
             hrs_senior_devs_quota: constants.hrs_senior_devs_quota,
+            hrs_hrs_dt: constants.hrs_hrs_dt,
+            hrs_hrs_quota: constants.hrs_hrs_quota,
             pms: Default::default(),
             pms_bugs_conversion_dt: constants.pms_bugs_conversion_dt,
             interns_promotion_ratio_dt: constants.interns_promotion_ratio_dt,
@@ -144,11 +148,18 @@ impl State {
             * self.hrs_senior_devs_dt
             * self.hrs_senior_devs_quota
             * self.dt;
+        let auto_hrs = if self.researched.contains(&Research::RecursiveHR) {
+            (self.hrs + self.manual_hrs) * self.hrs_hrs_dt * self.hrs_hrs_quota * self.dt
+        } else {
+            Decimal::ZERO
+        };
 
         // update interns, junior devs, senior devs count, accounting for all sources
         self.interns += auto_interns;
         self.junior_devs += auto_junior_devs;
         self.senior_devs += auto_senior_devs;
+        self.hrs += auto_hrs;
+
         let seniors_becoming_pms = (self.senior_devs + self.manual_senior_devs)
             * self.senior_devs_management_ratio_dt
             * self.dt;

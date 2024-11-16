@@ -33,6 +33,7 @@ pub(crate) struct GameConstants {
     pub research_syntax_coloring_multiplier_loc_cost: Decimal,
     pub research_management_career_loc_cost: Decimal,
     pub research_smart_staffing_loc_cost: Decimal,
+    pub research_recursive_hr_loc_cost: Decimal,
     // initial promotion ratio
     pub interns_promotion_ratio_dt: Decimal,
     pub junior_devs_promotion_ratio_dt: Decimal,
@@ -48,6 +49,8 @@ pub(crate) struct GameConstants {
     pub hrs_junior_devs_quota: Decimal,
     pub hrs_senior_devs_dt: Decimal,
     pub hrs_senior_devs_quota: Decimal,
+    pub hrs_hrs_dt: Decimal,
+    pub hrs_hrs_quota: Decimal,
     // pm bugs conversion
     pub pms_bugs_conversion_dt: Decimal,
     // manual loc production
@@ -110,6 +113,7 @@ impl Default for GameConstants {
             research_syntax_coloring_multiplier_loc_cost: Decimal::new(1.0),
             research_management_career_loc_cost: Decimal::new(1.0),
             research_smart_staffing_loc_cost: Decimal::new(1.0),
+            research_recursive_hr_loc_cost: Decimal::new(1.0),
             interns_promotion_ratio_dt: Decimal::new(0.04),
             junior_devs_promotion_ratio_dt: Decimal::new(0.02),
             senior_devs_retirement_ratio_dt: Decimal::new(0.01),
@@ -122,6 +126,8 @@ impl Default for GameConstants {
             hrs_junior_devs_quota: Decimal::new(0.09),
             hrs_senior_devs_dt: Decimal::new(1e-4),
             hrs_senior_devs_quota: Decimal::new(0.01),
+            hrs_hrs_dt: Decimal::new(1e-4),
+            hrs_hrs_quota: Decimal::new(0.01),
             pms_bugs_conversion_dt: Decimal::new(1.0),
             loc_per_clicks: Decimal::new(1.0),
             debug_per_clicks: Decimal::new(1.0),
@@ -183,6 +189,7 @@ pub(crate) enum Research {
     Mouse,
     PhysicsEngine,
     ProjectManagement,
+    RecursiveHR,
     Rmrf,
     SeniorDevsPosition,
     SmartStaffing,
